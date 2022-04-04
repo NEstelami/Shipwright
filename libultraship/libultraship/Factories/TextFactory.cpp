@@ -23,4 +23,26 @@ namespace Ship
 
         return txt;
     }
+
+    Text* TextFactory::ReadTextXML(tinyxml2::XMLElement* reader)
+    {
+        Text* txt = new Text();
+
+        Version version = (Version)reader->IntAttribute("Version");
+
+        switch (version)
+        {
+        case Version::Deckard:
+        {
+            TextV0 txtFac = TextV0();
+            txtFac.ParseFileXML(reader, txt);
+        }
+        break;
+        default:
+            // VERSION NOT SUPPORTED
+            break;
+        }
+
+        return txt;
+    }
 }

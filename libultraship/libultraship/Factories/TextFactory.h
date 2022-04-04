@@ -7,5 +7,6 @@ namespace Ship
     {
     public:
         static Text* ReadText(BinaryReader* reader);
+        static Text* ReadTextXML(tinyxml2::XMLElement* reader);
     };
 }

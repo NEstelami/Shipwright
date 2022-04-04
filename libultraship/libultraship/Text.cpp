@@ -1,5 +1,31 @@
 #include "Text.h"
 
+void Ship::TextV0::ParseFileXML(tinyxml2::XMLElement* reader, Resource* res)
+{
+	Text* txt = (Text*)res;
+
+	auto child = reader->FirstChildElement();
+
+	while (child != nullptr)
+	{
+		std::string childName = child->Name();
+
+		if (childName == "TextEntry")
+		{
+			MessageEntry entry;
+			entry.id = child->IntAttribute("ID");
+			entry.textboxType = child->IntAttribute("TextboxType");
+			entry.textboxYPos = child->IntAttribute("TextboxYPos");
+			entry.msg = child->Attribute("Message");
+
+			txt->messages.push_back(entry);
+			int bp = 0;
+		}
+
+		child = child->NextSiblingElement();
+	}
+}
+
 void Ship::TextV0::ParseFileBinary(BinaryReader* reader, Resource* res)
 {
 	Text* txt = (Text*)res;

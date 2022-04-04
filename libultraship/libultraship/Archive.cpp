@@ -91,9 +91,9 @@ namespace Ship {
             return FileToLoad;
         }
 
-        DWORD dwFileSize = SFileGetFileSize(fileHandle, 0);
-        std::shared_ptr<char[]> fileData(new char[dwFileSize]);
-        DWORD dwBytes;
+		DWORD dwFileSize = SFileGetFileSize(fileHandle, 0);
+		std::shared_ptr<char[]> fileData(new char[dwFileSize + 1]);
+		DWORD dwBytes;
 
         if (!SFileReadFile(fileHandle, fileData.get(), dwFileSize, &dwBytes, NULL))
         {
@@ -117,6 +117,15 @@ namespace Ship {
         FileToLoad->buffer = fileData;
         FileToLoad->dwBufferSize = dwFileSize;
         FileToLoad->bIsLoaded = true;
+
+		// Throw in a null terminator at the end incase we're loading a text file...
+		fileData[dwFileSize] = '\0';
+
+		std::unique_lock<std::mutex> Lock(FileToLoad->FileLoadMutex);
+		FileToLoad->parent = includeParent ? shared_from_this() : nullptr;
+		FileToLoad->buffer = fileData;
+		FileToLoad->dwBufferSize = dwFileSize + 1;
+		FileToLoad->bIsLoaded = true;
 
         return FileToLoad;
     }

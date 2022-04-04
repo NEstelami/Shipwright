@@ -43,6 +43,7 @@ public:
 	Vec2f ReadVec2f();
 	Color3b ReadColor3b();
 	std::string ReadString();
+	std::string ReadStringNT();
 
 protected:
 	std::shared_ptr<Stream> stream;

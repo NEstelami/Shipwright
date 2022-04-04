@@ -16,6 +16,7 @@ namespace Ship
 	class TextV0 : public ResourceFile
 	{
 	public:
+		void ParseFileXML(tinyxml2::XMLElement* reader, Resource* res) override;
 		void ParseFileBinary(BinaryReader* reader, Resource* res) override;
 	};
 

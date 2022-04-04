@@ -23,19 +23,53 @@ namespace Ship
     Resource* ResourceLoader::LoadResource(std::shared_ptr<File> FileToLoad)
     {
         auto reader = std::make_shared<BinaryReader>(FileToLoad->buffer.get(), FileToLoad->dwBufferSize);
+        Resource* result = nullptr;
+        ResourceType resourceType;
 
-        Endianness endianness = (Endianness)reader->ReadInt8();
+        // Determine if file is binary or XML...
+        uint8_t firstByte = reader->ReadByte();
 
         for (int i = 0; i < 3; i++)
             reader->ReadInt8();
+        if (firstByte == '<')
+        {
+            // XML
+            reader->Seek(-1, SeekOffsetType::Current);
 
         reader->SetEndianness(endianness);
+            std::string xmlStr = reader->ReadStringNT();
+            
+            tinyxml2::XMLDocument doc;
+            tinyxml2::XMLError eResult = doc.Parse(xmlStr.data());
 
-        ResourceType resourceType = (ResourceType)reader->ReadUInt32();
-        Resource* result = nullptr;
+            // OTRTODO: Error checking
 
-        switch (resourceType)
-        {
+            tinyxml2::XMLElement* root = doc.FirstChildElement();
+
+            std::string nodeName = root->Name();
+
+            if (nodeName == "Text")
+            {
+                result = TextFactory::ReadTextXML(root);
+                resourceType = ResourceType::Text;
+            }
+            else
+            {
+                // RESOURCE TYPE NOT SUPPORTED
+            }
+        }
+        else
+        {            
+            // Binary
+            Endianess endianess = (Endianess)firstByte;
+
+            for (int i = 0; i < 3; i++)
+                reader->ReadByte();
+
+            // OTRTODO: Setup the binaryreader to use the resource's endianess
+
+            resourceType = (ResourceType)reader->ReadUInt32();
+
         case ResourceType::Material:
             result = MaterialFactory::ReadMaterial(reader.get());
             break;
@@ -104,10 +138,12 @@ namespace Ship
         if (result != nullptr) {
             result->file = FileToLoad;
             result->resType = resourceType;
-        } else {
+        }
+        else {
             if (FileToLoad != nullptr) {
                 SPDLOG_ERROR("Failed to load resource of type {} \"{}\"", resourceType, FileToLoad->path);
-            } else {
+            }
+            else {
                 SPDLOG_ERROR("Failed to load resource because the file did not load.");
             }
         }
