@@ -193,7 +193,13 @@ extern "C" {
         }
     }
 
-    char* ResourceMgr_LoadTexByName(char* texPath) {
+    char* ResourceMgr_LoadTexByName(char* texPath) 
+    {
+        if (strcmp(texPath, "__OTR__textures/nes_font_static/gMsgChar4ALatinCapitalLetterJTex") == 0)
+        {
+            int bp = 0;
+        }
+
         const auto res = static_cast<Ship::Texture*>(Ship::GlobalCtx2::GetInstance()->GetResourceManager()->LoadResource(texPath).get());
         ModInternal::ExecuteHooks<ModInternal::LoadTexture>(texPath, &res->imageData);
         return (char*)res->imageData;
