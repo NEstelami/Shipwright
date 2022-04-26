@@ -1316,15 +1316,16 @@ namespace SohImGui {
                         EnhancementCheckbox(name.c_str(), toggleName.c_str());
                         customWindows[name].enabled = CVar_GetS32(toggleName.c_str(), 0);
                     }
-                    ImGui::EndMenu();
                 }
 
             }
 
-            ImGui::EndMenuBar();
-        }
+            ImGui::End();
 
-        ImGui::End();
+            if (Game::Settings.debug.soh) {
+                const float framerate = ImGui::GetIO().Framerate;
+                ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0, 0, 0, 0));
+                ImGui::Begin("Debug Stats", nullptr, ImGuiWindowFlags_None);
 
         if (CVar_GetS32("gStatsEnabled", 0)) {
             const float framerate = ImGui::GetIO().Framerate;
@@ -1350,16 +1351,15 @@ namespace SohImGui {
             if (window.drawFunc != nullptr) {
                 window.drawFunc(window.enabled);
             }
-        }
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-        ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground;
-        ImGui::Begin("OoT Master Quest", nullptr, flags);
-        ImGui::PopStyleVar(3);
-        ImGui::PopStyleColor();
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 0.0f);
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+            ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground;
+            ImGui::Begin("OoT Master Quest", nullptr, flags);
+            ImGui::PopStyleVar(3);
+            ImGui::PopStyleColor();
 
         ImVec2 main_pos = ImGui::GetWindowPos();
         main_pos.x -= top_left_pos.x;
