@@ -1,0 +1,52 @@
+<Root>
+    <File Name="ovl_Boss_Ganon" BaseAddress="0x809F1D00" RangeStart="0xE398" RangeEnd="0x211D8">
+        <Texture Name="gDorfLightning1Tex" OutName="lightning_1" Format="i8" Width="32" Height="96" Offset="0x112E0"/>
+        <Texture Name="gDorfLightning2Tex" OutName="lightning_2" Format="i8" Width="32" Height="96" Offset="0x11EE0"/>
+        <Texture Name="gDorfLightning3Tex" OutName="lightning_3" Format="i8" Width="32" Height="96" Offset="0x12AE0"/>
+        <Texture Name="gDorfLightning4Tex" OutName="lightning_4" Format="i8" Width="32" Height="96" Offset="0x136E0"/>
+        <Texture Name="gDorfLightning5Tex" OutName="lightning_5" Format="i8" Width="32" Height="96" Offset="0x142E0"/>
+        <Texture Name="gDorfLightning6Tex" OutName="lightning_6" Format="i8" Width="32" Height="96" Offset="0x14EE0"/>
+        <Texture Name="gDorfLightning7Tex" OutName="lightning_7" Format="i8" Width="32" Height="96" Offset="0x15AE0"/>
+        <Texture Name="gDorfLightning8Tex" OutName="lightning_8" Format="i8" Width="32" Height="96" Offset="0x166E0"/>
+        <Texture Name="gDorfLightning9Tex" OutName="lightning_9" Format="i8" Width="32" Height="96" Offset="0x172E0"/>
+        <Texture Name="gDorfLightning10Tex" OutName="lightning_10" Format="i8" Width="32" Height="96" Offset="0x17EE0"/>
+        <Texture Name="gDorfLightning11Tex" OutName="lightning_11" Format="i8" Width="32" Height="96" Offset="0x18AE0"/>
+        <Texture Name="gDorfLightning12Tex" OutName="lightning_12" Format="i8" Width="32" Height="96" Offset="0x196E0"/>
+        
+        <Texture Name="gDorfWindowShatterTemplateTex" OutName="window_shatter_template" Format="ci8" Width="32" Height="64" Offset="0xFA18"/>
+
+        <DList Name="gDorfLightStreak1DL" Offset="0x1F9D0"/>
+        <DList Name="gDorfLightStreak2DL" Offset="0x1FA08"/>
+        <DList Name="gDorfLightStreak3DL" Offset="0x1FA40"/>
+        <DList Name="gDorfLightStreak4DL" Offset="0x1FA78"/>
+        <DList Name="gDorfLightStreak5DL" Offset="0x1FAB0"/>
+        <DList Name="gDorfLightStreak6DL" Offset="0x1FAE8"/>
+        <DList Name="gDorfLightStreak7DL" Offset="0x1FB20"/>
+        <DList Name="gDorfLightStreak8DL" Offset="0x1FB58"/>
+        <DList Name="gDorfLightStreak9DL" Offset="0x1FB90"/>
+        <DList Name="gDorfLightStreak10DL" Offset="0x1FBC8"/>
+        <DList Name="gDorfLightStreak11DL" Offset="0x1FC00"/>
+        <DList Name="gDorfLightStreak12DL" Offset="0x1FC38"/>
+
+        <DList Name="gDorfShadowSetupDL" Offset="0xE3D8"/>
+        <DList Name="gDorfShadowModelDL" Offset="0xE3F8"/>
+        <DList Name="gDorfTriforceDL" Offset="0xF468"/>
+        <DList Name="gDorfWindowShardMaterialDL" Offset="0xF958"/>
+        <DList Name="gDorfWindowShardModelDL" Offset="0xFA00"/>
+        <DList Name="gDorfLightBallMaterialDL" Offset="0x11258"/>
+        <DList Name="gDorfSquareDL" Offset="0x112C8"/>
+        <DList Name="gDorfLightningDL" Offset="0x1A320"/>
+        <DList Name="gDorfUnusedDL" Offset="0x1A3D0"/>
+        <DList Name="gDorfLightRayTriDL" Offset="0x1A448"/>
+        <DList Name="gDorfLightFlecksDL" Offset="0x1BEA0"/>
+        <DList Name="gDorfBigMagicBGCircleDL" Offset="0x1BF90"/>
+        <DList Name="gDorfDotDL" Offset="0x1C038"/>
+        <DList Name="gDorfShockwaveDL" Offset="0x1CAA0"/>
+        <DList Name="gDorfImpactDarkDL" Offset="0x1D938"/>
+        <DList Name="gDorfImpactLightDL" Offset="0x1DA50"/>
+        <DList Name="gDorfShockGlowDL" Offset="0x1EBA8"/>
+        <DList Name="gDorfLightCoreDL" Offset="0x1FF08"/>
+        <DList Name="gDorfShockDL" Offset="0x1FFD0"/>
+        <DList Name="gDorfVortexDL" Offset="0x20DB0"/>
+    </File>
+</Root>

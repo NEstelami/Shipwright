@@ -73,17 +73,17 @@ ZRom::ZRom(std::string romPath)
 	{
 	case OOT_NTSC_10:
 		version.version = "N64 NTSC 1.0";
-		version.listPath = "ntsc_oot.txt";
+		version.listPath = "n64_ntsc.txt";
 		version.offset = OOT_OFF_NTSC_10;
 		break;
 	case OOT_NTSC_11:
 		version.version = "N64 NTSC 1.1";
-		version.listPath = "ntsc_oot.txt";
+		version.listPath = "n64_ntsc.txt";
 		version.offset = OOT_OFF_NTSC_11;
 		break;
 	case OOT_NTSC_12:
 		version.version = "N64 NTSC 1.2";
-		version.listPath = "ntsc_oot.txt";
+		version.listPath = "n64_ntsc.txt";
 		version.offset = OOT_OFF_NTSC_12;
 		break;
 	case OOT_PAL_10:
@@ -191,6 +191,9 @@ ZRom::ZRom(std::string romPath)
 		}
 		else
 			files[lines[i]] = outData;
+
+		// TODO: Add some kind of flag for this.
+		//File::WriteAllBytes("baserom\\" + lines[i], files[lines[i]]);
 	}
 
 	int bp = 0;

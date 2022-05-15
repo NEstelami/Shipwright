@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "message_data_static.h"
-#include "textures/nes_font_static/nes_font_static.h"
+#include "persistent/textures/nes_font_static/nes_font_static.h"
 #include "textures/message_static/message_static.h"
 
 static const char* fntTbl[] =
@@ -218,7 +218,11 @@ void Font_LoadOrderedFont(Font* font) {
             osSyncPrintf("nes_mes_buf[%d]=%d\n", codePointIndex, font->msgBuf[codePointIndex]);
 
             offset = (font->msgBuf[codePointIndex] - '\x20') * FONT_CHAR_TEX_SIZE;
-            memcpy(fontBuf, ResourceMgr_LoadTexByName(fntTbl[offset / FONT_CHAR_TEX_SIZE]), FONT_CHAR_TEX_SIZE);
+            char* texPtr = ResourceMgr_LoadTexByName(fntTbl[offset / FONT_CHAR_TEX_SIZE]);
+
+            if (texPtr != NULL)
+                memcpy(fontBuf, texPtr, FONT_CHAR_TEX_SIZE);
+            
             //DmaMgr_SendRequest1(fontBuf, fontStatic + offset, FONT_CHAR_TEX_SIZE, "../z_kanfont.c", 134);
             fontBufIndex += FONT_CHAR_TEX_SIZE / 8;
         }

@@ -30,6 +30,7 @@ ZResource::ZResource(ZFile* nParent)
 
 void ZResource::ExtractFromXML(tinyxml2::XMLElement* reader, offset_t nRawDataIndex)
 {
+
 	rawDataIndex = nRawDataIndex;
 	declaredInXml = true;
 

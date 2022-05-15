@@ -774,6 +774,9 @@ static void* sSaveConfirmationTexs[] = {
     gPauseSaveConfirmationFRATex,
 };
 
+#define gContinuePlayingFRATex "__OTR__textures/icon_item_gameover_static/gContinuePlayingFRATex"
+#define gContinuePlayingGERTex "__OTR__textures/icon_item_gameover_static/gContinuePlayingGERTex"
+
 static void* sContinuePromptTexs[] = {
     gContinuePlayingENGTex,
     gContinuePlayingGERTex,

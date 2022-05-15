@@ -69,6 +69,7 @@ ZFile::ZFile(ZFileMode nMode, tinyxml2::XMLElement* reader, const fs::path& nBas
 	mode = nMode;
 	workerID = nWorkerID;
 
+
 	ParseXML(reader, filename);
 	if (mode != ZFileMode::ExternalFile)
 		DeclareResourceSubReferences();
@@ -169,6 +170,7 @@ void ZFile::ParseXML(tinyxml2::XMLElement* reader, const std::string& filename)
 			}
 		}
 	}
+
 	Globals::Instance->AddSegment(segment, this, workerID);
 
 	if (Globals::Instance->verbosity >= VerbosityLevel::VERBOSITY_INFO)
@@ -238,6 +240,7 @@ void ZFile::ParseXML(tinyxml2::XMLElement* reader, const std::string& filename)
 			                        "");
 		}
 
+
 		if (Globals::Instance->verbosity >= VerbosityLevel::VERBOSITY_INFO)
 			printf("%s: 0x%06X\n", nameXml, rawDataIndex);
 
@@ -261,6 +264,8 @@ void ZFile::ParseXML(tinyxml2::XMLElement* reader, const std::string& filename)
 			}
 			nameSet.insert(nameXml);
 		}
+
+
 
 		std::string nodeName = std::string(child->Name());
 
@@ -287,6 +292,7 @@ void ZFile::ParseXML(tinyxml2::XMLElement* reader, const std::string& filename)
 			}
 
 			rawDataIndex += nRes->GetRawDataSize();
+
 		}
 		else if (std::string_view(child->Name()) == "File")
 		{
@@ -299,6 +305,8 @@ void ZFile::ParseXML(tinyxml2::XMLElement* reader, const std::string& filename)
 				"Unknown element found inside a <File> element: %s", nodeName.c_str());
 			HANDLE_ERROR_PROCESS(WarningType::InvalidXML, errorHeader, "");
 		}
+
+
 	}
 }
 

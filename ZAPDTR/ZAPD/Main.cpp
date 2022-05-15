@@ -28,6 +28,7 @@
 //extern const char gBuildHash[];
 const char gBuildHash[] = "";
 
+#ifndef _MSC_VER
 // LINUX_TODO: remove, those are because of soh <-> lus dependency problems
 float divisor_num = 0.0f;
 
@@ -51,7 +52,7 @@ void DebugConsole_LoadCVars()
 {
 
 }
-
+#endif
 
 bool Parse(const fs::path& xmlFilePath, const fs::path& basePath, const fs::path& outPath,
            ZFileMode fileMode, int workerID);
@@ -61,7 +62,7 @@ void BuildAssetBackground(const fs::path& imageFilePath, const fs::path& outPath
 void BuildAssetBlob(const fs::path& blobFilePath, const fs::path& outPath);
 int ExtractFunc(int workerID, int fileListSize, std::string fileListItem, ZFileMode fileMode);
 
-volatile int numWorkersLeft = 0;
+std::atomic<int> numWorkersLeft;
 
 #ifdef __linux__
 #define ARRAY_COUNT(arr) (sizeof(arr) / sizeof(arr[0]))
@@ -308,6 +309,8 @@ int main(int argc, char* argv[])
 		WarningHandler::PrintWarningsDebugInfo();
 	}
 
+	numWorkersLeft = 0;
+
 	// TODO: switch
 	if (fileMode == ZFileMode::Extract || fileMode == ZFileMode::BuildSourceFile || fileMode == ZFileMode::ExtractDirectory)
 	{
@@ -439,14 +442,20 @@ int ExtractFunc(int workerID, int fileListSize, std::string fileListItem, ZFileM
 		                        extFile.outPath, ZFileMode::ExternalFile, workerID);
 
 		if (!parseSuccessful)
+		{
+			printf("parse was not successful\n");
 			return 1;
+		}
 	}
 
 	parseSuccessful = Parse(fileListItem, Globals::Instance->baseRomPath,
 	                        Globals::Instance->outputPath, fileMode, workerID);
 
 	if (!parseSuccessful)
+	{
+		printf("parse was not successful\n");
 		return 1;
+	}
 
 	if (Globals::Instance->singleThreaded)
 	{
@@ -505,11 +514,13 @@ bool Parse(const fs::path& xmlFilePath, const fs::path& basePath, const fs::path
 		return false;
 	}
 
+
 	for (tinyxml2::XMLElement* child = root->FirstChildElement(); child != NULL;
 	     child = child->NextSiblingElement())
 	{
 		if (std::string_view(child->Name()) == "File")
 		{
+
 			ZFile* file = new ZFile(fileMode, child, basePath, outPath, "", xmlFilePath, workerID);
 			Globals::Instance->AddFile(file, workerID);
 			if (fileMode == ZFileMode::ExternalFile)
@@ -517,6 +528,7 @@ bool Parse(const fs::path& xmlFilePath, const fs::path& basePath, const fs::path
 				Globals::Instance->AddExternalFile(file, workerID);
 				file->isExternalFile = true;
 			}
+
 		}
 		else if (std::string(child->Name()) == "ExternalFile")
 		{

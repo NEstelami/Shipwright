@@ -34,6 +34,7 @@ class RomVersion:
             self.file_table = [line.strip('\n') for line in f]
 
 ROM_INFO_TABLE = dict()
+ROM_INFO_TABLE[Checksums.OOT_NTSC_US_GC] = RomVersion("CFG/filelists/gamecube.txt", 0x7170, "GC_NMQ_NTSC_F")
 ROM_INFO_TABLE[Checksums.OOT_PAL_GC] = RomVersion("CFG/filelists/gamecube_pal.txt", 0x7170, "GC_NMQ_PAL_F")
 ROM_INFO_TABLE[Checksums.OOT_PAL_GC_DBG1] = RomVersion("CFG/filelists/dbg.txt", 0x12F70, "GC_NMQ_D")
 

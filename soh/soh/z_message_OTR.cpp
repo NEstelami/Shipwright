@@ -18,7 +18,6 @@ MessageTableEntry* OTRMessage_LoadTable(const char* filePath, bool isNES) {
 
     if (file == nullptr)
         return nullptr;
-    
     MessageTableEntry* table = (MessageTableEntry*)malloc(sizeof(MessageTableEntry) * file->messages.size());
 
     for (int i = 0; i < file->messages.size(); i++) {

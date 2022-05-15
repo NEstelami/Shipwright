@@ -13,6 +13,7 @@ ZText::ZText(ZFile* nParent) : ZResource(nParent)
 {
 	RegisterRequiredAttribute("CodeOffset");
 	RegisterOptionalAttribute("LangOffset", "0");
+	RegisterOptionalAttribute("IsNTSC", "false");
 }
 
 void ZText::ParseRawData()
@@ -23,12 +24,13 @@ void ZText::ParseRawData()
 	uint32_t currentPtr = StringHelper::StrToL(registeredAttributes.at("CodeOffset").value, 16);
 	uint32_t langPtr = currentPtr;
 	bool isPalLang = false;
+	bool isNTSC = registeredAttributes.at("IsNTSC").value == "true";
 
 	if (StringHelper::StrToL(registeredAttributes.at("LangOffset").value, 16) != 0)
 	{
 		langPtr = StringHelper::StrToL(registeredAttributes.at("LangOffset").value, 16);
 
-		if (langPtr != currentPtr)
+		if (langPtr != currentPtr && !isNTSC)
 			isPalLang = true;
 	}
 

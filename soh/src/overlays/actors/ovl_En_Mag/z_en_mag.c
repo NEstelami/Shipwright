@@ -7,6 +7,9 @@
 #include "z_en_mag.h"
 #include "objects/object_mag/object_mag.h"
 
+#define gTitleCopyright19982002Tex "__OTR__objects/object_mag/gTitleCopyright19982002Tex"
+#define gTitleCopyright19982003Tex "__OTR__objects/object_mag/gTitleCopyright19982003Tex"
+
 #define FLAGS (ACTOR_FLAG_4 | ACTOR_FLAG_5)
 
 void EnMag_Init(Actor* thisx, GlobalContext* globalCtx);

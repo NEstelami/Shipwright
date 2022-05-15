@@ -37,7 +37,8 @@ MessageTableEntry* sGerMessageEntryTablePtr;
 MessageTableEntry* sFraMessageEntryTablePtr;
 MessageTableEntry* sStaffMessageEntryTablePtr;
 
-char* _message_0xFFFC_nes;
+// char* _message_0xFFFC_nes = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.?!:_()\"-,./}}";
+char* _message_0xFFFC_nes = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz -.";
 
 s16 sTextboxBackgroundForePrimColors[][3] = {
     { 255, 255, 255 }, { 50, 20, 0 },     { 255, 60, 0 },    { 255, 255, 255 },
@@ -296,7 +297,7 @@ void Message_FindMessage(GlobalContext* globalCtx, u16 textId) {
             font->msgLength = messageTableEntry->msgSize;
 
             // "Message found!!!"
-            osSyncPrintf(" メッセージが,見つかった！！！ = %x  "
+            printf(" メッセージが,見つかった！！！ = %x  "
                          "(data=%x) (data0=%x) (data1=%x) (data2=%x) (data3=%x)\n",
                          textId, font->msgOffset, font->msgLength, foundSeg, seg, nextSeg);
             return;

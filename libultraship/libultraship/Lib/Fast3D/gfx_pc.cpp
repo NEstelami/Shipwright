@@ -2174,7 +2174,7 @@ static void gfx_run_dl(Gfx* cmd) {
                         mtxAddr = clearMtx;
                     }
                 } else {
-                    if (mtxAddr == SEG_ADDR(0, 0x12DB20) || mtxAddr == SEG_ADDR(0, 0x12DB40)) {
+                    if (mtxAddr == SEG_ADDR(0, 0x12DB20) || mtxAddr == SEG_ADDR(0, 0x12DB40) || mtxAddr == SEG_ADDR(0, 0xFEDB0)) {
                         mtxAddr = clearMtx;
                     }
                 }

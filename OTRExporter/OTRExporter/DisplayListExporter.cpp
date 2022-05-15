@@ -44,6 +44,9 @@
 {    (_SHIFTL(G_TEXRECT, 24, 8) | _SHIFTL(xh, 12, 12) | _SHIFTL(yh, 0, 12)),\
     (_SHIFTL(tile, 24, 3) | _SHIFTL(xl, 12, 12) | _SHIFTL(yl, 0, 12)) }
 
+# define gsMoveMem(size, index, offset, address)    \
+      gsDma2p(G_MOVEMEM,(address),size,index,offset)
+
 void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, BinaryWriter* writer)
 {
 	ZDisplayList* dList = (ZDisplayList*)res;
@@ -136,6 +139,20 @@ void OTRExporter_DisplayList::Save(ZResource* res, const fs::path& outPath, Bina
 			word1 = value.words.w1;
 		}
 		break;
+		case G_MOVEMEM:
+		{
+			int bp = 0;
+
+			int32_t nn = (data & 0x00FF000000000000) >> 48;
+			int32_t oo = (data & 0x0000FF0000000000) >> 40;
+			int32_t ii = (data & 0x000000FF00000000) >> 32;
+			int32_t aa = (data & 0xFFFFFFFF);
+
+			Gfx value = gsMoveMem(((nn >> 3) + 1) * 8, ii, oo * 8, aa);
+			word0 = value.words.w0;
+			word1 = value.words.w1;
+		}
+			break;
 		case G_RDPPIPESYNC:
 		{
 			Gfx value = gsDPPipeSync();

@@ -158,7 +158,7 @@ static void ExporterResourceEnd(ZResource* res, BinaryWriter& writer)
 			fName = StringHelper::Sprintf("%s/%s", oName.c_str(), rName.c_str());
 
 		if (Globals::Instance->fileMode == ZFileMode::ExtractDirectory)
-			files[fName] = strem->ToVector();
+			files[fName] = strem->ToVector(); // OTRTODO: Once in a blue moon ZAPD gets hungup here. This may be why some people are having problems generating the OTR...
 		else
 			File::WriteAllBytes("Extract/" + fName, strem->ToVector());
 	}

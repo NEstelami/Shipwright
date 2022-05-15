@@ -720,6 +720,7 @@ typedef struct {
     /* 0x12 */ u16 height;
 } OptionsMenuTextureInfo; // size = 0x14
 
+
 static OptionsMenuTextureInfo gOptionsMenuHeaders[] = {
     {
         { gFileSelOptionsENGTex, gFileSelOptionsGERTex, gFileSelOptionsENGTex },
