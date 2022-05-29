@@ -51,7 +51,7 @@ extern "C" void CVar_SetS32(const char* name, s32 value) {
     if (!cvar) {
         cvar = std::make_unique<CVar>();
     }
-    cvar->type = CVAR_TYPE_S32;
+    cvar->type = CVarType::S32;
     cvar->value.valueS32 = value;
 }
 
@@ -60,7 +60,7 @@ void CVar_SetFloat(const char* name, float value) {
     if (!cvar) {
         cvar = std::make_unique<CVar>();
     }
-    cvar->type = CVAR_TYPE_FLOAT;
+    cvar->type = CVarType::Float;
     cvar->value.valueFloat = value;
 }
 
@@ -69,7 +69,7 @@ void CVar_SetString(const char* name, const char* value) {
     if (!cvar) {
         cvar = std::make_unique<CVar>();
     }
-    cvar->type = CVAR_TYPE_STRING;
+    cvar->type = CVarType::String;
     cvar->value.valueStr = value;
 }
 

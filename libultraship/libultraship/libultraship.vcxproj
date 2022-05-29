@@ -346,6 +346,7 @@
     <ClInclude Include="Audio.h" />
     <ClInclude Include="AudioPlayer.h" />
     <ClInclude Include="Blob.h" />
+    <ClInclude Include="color.h" />
     <ClInclude Include="Cvar.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="Factories\AudioFactory.h" />
