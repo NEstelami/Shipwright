@@ -71,7 +71,12 @@ namespace Ship
         Rachael     = 2,
         Leon        = 3,
         Zhora       = 4,
-        // ...
+        // TR
+        Rinzler     = 5,
+        Flynn       = 6,
+        Bradley     = 7,
+        Quorra      = 8,
+        Clu         = 9,
     };
 
     struct Patch
