@@ -386,6 +386,7 @@ void FileChoose_DrawNameEntry(GameState* thisx) {
                 if (this->newFileNameCharCount < 0) {
                     this->newFileNameCharCount = 0;
                     this->configMode = CM_NAME_ENTRY_TO_MAIN;
+                    CVar_SetS32("gOnFileSelectNameEntry", 0);
                 } else {
                     for (i = this->newFileNameCharCount; i < 7; i++) {
                         filename[i] = filename[i + 1];
@@ -459,6 +460,8 @@ void FileChoose_DrawNameEntry(GameState* thisx) {
                             Sram_InitSave(this);
                             gSaveContext.dayTime = dayTime;
                             this->configMode = CM_NAME_ENTRY_TO_MAIN;
+                            CVar_SetS32("gOnFileSelectNameEntry", 0);
+                            CVar_SetS32("gNewFileDropped", 0);
                             this->nameBoxAlpha[this->buttonIndex] = this->nameAlpha[this->buttonIndex] = 200;
                             this->connectorAlpha[this->buttonIndex] = 255;
                             func_800AA000(300.0f, 0xB4, 0x14, 0x64);
@@ -921,7 +924,7 @@ void FileChoose_DrawOptionsImpl(GameState* thisx) {
 
         gDPLoadTextureBlock(POLY_OPA_DISP++, gOptionsMenuSettings[i].texture[gSaveContext.language], G_IM_FMT_IA,
                             G_IM_SIZ_8b, gOptionsMenuSettings[i].width[gSaveContext.language],
-                            gOptionsMenuHeaders[i].height, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                            gOptionsMenuSettings[i].height, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                             G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gSP1Quadrangle(POLY_OPA_DISP++, vtx, vtx + 2, vtx + 3, vtx + 1, 0);
     }
@@ -945,7 +948,7 @@ void FileChoose_DrawOptionsImpl(GameState* thisx) {
 
         gDPLoadTextureBlock(POLY_OPA_DISP++, gOptionsMenuSettings[i].texture[gSaveContext.language], G_IM_FMT_IA,
                             G_IM_SIZ_8b, gOptionsMenuSettings[i].width[gSaveContext.language],
-                            gOptionsMenuHeaders[i].height, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
+                            gOptionsMenuSettings[i].height, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP,
                             G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
         gSP1Quadrangle(POLY_OPA_DISP++, vtx, vtx + 2, vtx + 3, vtx + 1, 0);
     }

@@ -31,6 +31,9 @@
 #elif __APPLE__
 #include <SDL.h>
 #include <GL/glew.h>
+#elif __SWITCH__
+#include <SDL2/SDL.h>
+#include <glad/glad.h>
 #else
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
@@ -81,7 +84,7 @@ static uint32_t frame_count;
 static vector<Framebuffer> framebuffers;
 static size_t current_framebuffer;
 static float current_noise_scale;
-static FilteringMode current_filter_mode = THREE_POINT;
+static FilteringMode current_filter_mode = FILTER_THREE_POINT;
 
 GLuint pixel_depth_rb, pixel_depth_fb;
 size_t pixel_depth_rb_size;
@@ -376,7 +379,7 @@ static struct ShaderProgram* gfx_opengl_create_and_load_new_shader(uint64_t shad
         append_line(fs_buf, &fs_len, "}");
     }
 
-    if (current_filter_mode == THREE_POINT) {
+    if (current_filter_mode == FILTER_THREE_POINT) {
     #if __APPLE__
         append_line(fs_buf, &fs_len, "#define TEX_OFFSET(off) texture(tex, texCoord - (off)/texSize)");
     #else
@@ -638,9 +641,14 @@ static void gfx_opengl_select_texture(int tile, GLuint texture_id) {
     glActiveTexture(GL_TEXTURE0 + tile);
     glBindTexture(GL_TEXTURE_2D, texture_id);
 }
+
 static void gfx_opengl_upload_texture(const uint8_t *rgba32_buf, uint32_t width, uint32_t height) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba32_buf);
 }
+
+#ifdef __SWITCH__
+#define GL_MIRROR_CLAMP_TO_EDGE 0x8743
+#endif
 
 static uint32_t gfx_cm_to_opengl(uint32_t val) {
     switch (val) {
@@ -657,7 +665,7 @@ static uint32_t gfx_cm_to_opengl(uint32_t val) {
 }
 
 static void gfx_opengl_set_sampler_parameters(int tile, bool linear_filter, uint32_t cms, uint32_t cmt) {
-    const GLint filter = linear_filter && current_filter_mode == LINEAR ? GL_LINEAR : GL_NEAREST;
+    const GLint filter = linear_filter && current_filter_mode == FILTER_LINEAR ? GL_LINEAR : GL_NEAREST;
     glActiveTexture(GL_TEXTURE0 + tile);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
@@ -709,9 +717,9 @@ static void gfx_opengl_draw_triangles(float buf_vbo[], size_t buf_vbo_len, size_
 }
 
 static void gfx_opengl_init(void) {
-//#if FOR_WINDOWS
+#ifndef __SWITCH__
     glewInit();
-//#endif
+#endif
 
     glGenBuffers(1, &opengl_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, opengl_vbo);
@@ -839,9 +847,7 @@ void gfx_opengl_start_draw_to_framebuffer(int fb_id, float noise_scale) {
     if (noise_scale != 0.0f) {
         current_noise_scale = 1.0f / noise_scale;
     }
-
     glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
-
     current_framebuffer = fb_id;
 }
 

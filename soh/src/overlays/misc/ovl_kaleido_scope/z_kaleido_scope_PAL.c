@@ -872,6 +872,7 @@ void KaleidoScope_SetDefaultCursor(GlobalContext* globalCtx) {
     PauseContext* pauseCtx = &globalCtx->pauseCtx;
     s16 s;
     s16 i;
+    gSelectingMask = false;
 
     switch (pauseCtx->pageIndex) {
         case PAUSE_ITEM:
@@ -905,6 +906,7 @@ void KaleidoScope_SetDefaultCursor(GlobalContext* globalCtx) {
 void KaleidoScope_SwitchPage(PauseContext* pauseCtx, u8 pt) {
     pauseCtx->unk_1E4 = 1;
     pauseCtx->unk_1EA = 0;
+    gSelectingMask = false;
 
     if (!pt) {
         pauseCtx->mode = pauseCtx->pageIndex * 2 + 1;
@@ -1835,7 +1837,7 @@ void KaleidoScope_DrawInfoPanel(GlobalContext* globalCtx) {
             POLY_KAL_DISP = KaleidoScope_QuadTextureIA4(POLY_KAL_DISP, pauseCtx->nameSegment, 128, 16, 0);
         }
 
-        if (pauseCtx->pageIndex == PAUSE_MAP && CVar_GetS32("gDebugEnabled", 0) != 0) {
+        if (pauseCtx->pageIndex == PAUSE_MAP && CVar_GetS32("gSkulltulaDebugEnabled", 0) != 0) {
             if (YREG(7) != 0) {
                 osSyncPrintf(VT_FGCOL(YELLOW));
                 osSyncPrintf("キンスタ数(%d) Get_KIN_STA=%x (%x)  (%x)\n", YREG(6), GET_GS_FLAGS(YREG(6)),
@@ -2679,7 +2681,7 @@ void KaleidoScope_InitVertices(GlobalContext* globalCtx, GraphicsContext* gfxCtx
 
     for (phi_t3 = 1; phi_t3 < ARRAY_COUNT(gSaveContext.equips.buttonItems); phi_t3++, phi_t2 += 4) {
         if (gSaveContext.equips.cButtonSlots[phi_t3 - 1] != ITEM_NONE &&
-            ((phi_t3 < 4) || (CVar_GetS32("gDpadEquips", 0) != 0))) {
+            ((phi_t3 < 4) || CVar_GetS32("gDpadEquips", 0))) {
             phi_t4 = gSaveContext.equips.cButtonSlots[phi_t3 - 1] * 4;
 
             pauseCtx->itemVtx[phi_t2 + 0].v.ob[0] = pauseCtx->itemVtx[phi_t2 + 2].v.ob[0] =
@@ -3851,7 +3853,17 @@ void KaleidoScope_Update(GlobalContext* globalCtx)
                                                    &D_801333E8);
                             Gameplay_SaveSceneFlags(globalCtx);
                             gSaveContext.savedSceneNum = globalCtx->sceneNum;
-                            Save_SaveFile();
+                            if (gSaveContext.temporaryWeapon) {
+                                gSaveContext.equips.buttonItems[0] = ITEM_NONE;
+                                player->currentSwordItem = ITEM_NONE;
+                                Inventory_ChangeEquipment(EQUIP_SWORD, PLAYER_SWORD_NONE);
+                                Save_SaveFile();
+                                gSaveContext.equips.buttonItems[0] = ITEM_SWORD_KOKIRI;
+                                player->currentSwordItem = ITEM_SWORD_KOKIRI;
+                                Inventory_ChangeEquipment(EQUIP_SWORD, PLAYER_SWORD_KOKIRI);
+                            } else {
+                                Save_SaveFile();
+                            }
                             pauseCtx->unk_1EC = 4;
                             D_8082B25C = 3;
                         }

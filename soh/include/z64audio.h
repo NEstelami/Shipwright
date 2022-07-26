@@ -20,7 +20,6 @@
 
 #define CALC_RESAMPLE_FREQ(sampleRate) ((float)sampleRate / (s32)gAudioContext.audioBufferParameters.frequency)
 
-extern bool gUseLegacySD;
 extern char* fontMap[256];
 
 typedef enum {
@@ -783,6 +782,8 @@ typedef struct {
     /* 0x0D */ u8 reuseIndex; // position in sSampleDmaReuseQueue1/2, if ttl == 0
     /* 0x0E */ u8 ttl;        // duration after which the DMA can be discarded
 } SampleDma; // size = 0x10
+
+#include <PR/ultra64/abi.h>
 
 typedef struct {
     /* 0x0000 */ char unk_0000;
