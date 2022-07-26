@@ -1,7 +1,6 @@
 #ifndef _CVAR_H
 #define _CVAR_H
 
-#include <PR/ultra64/gbi.h>
 #include "color.h"
 #include <stdint.h>
 
