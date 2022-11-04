@@ -212,5 +212,14 @@ std::string Ship::BinaryReader::ReadString()
 
 std::string Ship::BinaryReader::ReadCString()
 {
-    return reader->ReadNullTerminatedString();
+    std::string res;
+
+    unsigned char c = 0;
+    do
+    {
+        c = ReadChar();
+        res += c;
+    } while (c != '\0');
+
+    return res;
 }

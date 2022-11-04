@@ -3,3 +3,5 @@
 #include "Span.h"
 
 Span<char> ReadAllBytes(const std::string& filePath);
+
+bool FileExists(const std::string& filePath);

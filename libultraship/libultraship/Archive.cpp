@@ -3,6 +3,7 @@
 #include "File.h"
 #include "Window.h"
 #include "ResourceMgr.h"
+#include "../../BinaryTools/BinaryTools/Binary.h"
 #include "spdlog/spdlog.h"
 #include "Utils/StringHelper.h"
 #include "Lib/StrHash64.h"
@@ -81,51 +82,66 @@ namespace Ship {
             mpqHandle = mainMPQ;
         }
 
-        bool attempt = SFileOpenFileEx(mpqHandle, filePath.c_str(), 0, &fileHandle);
+		// TEST - Read from filesystem first, then the MPQ archive...
+		if (FileExists("TestData/" + filePath))
+		{
+			auto byteData = ReadAllBytes("TestData/" + filePath);
+			std::shared_ptr<char[]> fileData(new char[byteData.Size() + 1]);
+			memcpy(fileData.get(), byteData.Data(), byteData.Size());
 
-        if (!attempt)
-        {
-            SPDLOG_ERROR("({}) Failed to open file {} from mpq archive  {}.", GetLastError(), filePath.c_str(), MainPath.c_str());
-            std::unique_lock<std::mutex> Lock(FileToLoad->FileLoadMutex);
-            FileToLoad->bHasLoadError = true;
-            return FileToLoad;
-        }
 
-		DWORD dwFileSize = SFileGetFileSize(fileHandle, 0);
-		std::shared_ptr<char[]> fileData(new char[dwFileSize + 1]);
-		DWORD dwBytes;
+			// Throw in a null terminator at the end incase we're loading a text file...
+			fileData[byteData.Size()] = '\0';
 
-        if (!SFileReadFile(fileHandle, fileData.get(), dwFileSize, &dwBytes, NULL))
-        {
-            SPDLOG_ERROR("({}) Failed to read file {} from mpq archive {}", GetLastError(), filePath.c_str(), MainPath.c_str());
-            if (!SFileCloseFile(fileHandle))
-            {
-                SPDLOG_ERROR("({}) Failed to close file {} from mpq after read failure in archive {}", GetLastError(), filePath.c_str(), MainPath.c_str());
-            }
-            std::unique_lock<std::mutex> Lock(FileToLoad->FileLoadMutex);
-            FileToLoad->bHasLoadError = true;
-            return FileToLoad;
-        }
+			std::unique_lock<std::mutex> Lock(FileToLoad->FileLoadMutex);
+			FileToLoad->parent = includeParent ? shared_from_this() : nullptr;
+			FileToLoad->buffer = fileData;
+			FileToLoad->dwBufferSize = byteData.Size() + 1;
+			FileToLoad->bIsLoaded = true;
+		}
+		else
+		{
+			bool attempt = SFileOpenFileEx(mpqHandle, filePath.c_str(), 0, &fileHandle);
 
-        if (!SFileCloseFile(fileHandle))
-        {
-            SPDLOG_ERROR("({}) Failed to close file {} from mpq archive {}", GetLastError(), filePath.c_str(), MainPath.c_str());
-        }
+			if (!attempt)
+			{
+				SPDLOG_ERROR("({}) Failed to open file {} from mpq archive  {}.", GetLastError(), filePath.c_str(), MainPath.c_str());
+				std::unique_lock<std::mutex> Lock(FileToLoad->FileLoadMutex);
+				FileToLoad->bHasLoadError = true;
+				return FileToLoad;
+			}
 
-        std::unique_lock<std::mutex> Lock(FileToLoad->FileLoadMutex);
-        FileToLoad->parent = includeParent ? shared_from_this() : nullptr;
-        FileToLoad->buffer = fileData;
-        FileToLoad->dwBufferSize = dwFileSize;
-        FileToLoad->bIsLoaded = true;
+			DWORD dwFileSize = SFileGetFileSize(fileHandle, 0);
+			std::shared_ptr<char[]> fileData(new char[dwFileSize + 1]);
+			DWORD dwBytes;
+			
 
-		// Throw in a null terminator at the end incase we're loading a text file...
-		fileData[dwFileSize] = '\0';
+			if (!SFileReadFile(fileHandle, fileData.get(), dwFileSize, &dwBytes, NULL))
+			{
+				SPDLOG_ERROR("({}) Failed to read file {} from mpq archive {}", GetLastError(), filePath.c_str(), MainPath.c_str());
+				if (!SFileCloseFile(fileHandle))
+				{
+					SPDLOG_ERROR("({}) Failed to close file {} from mpq after read failure in archive {}", GetLastError(), filePath.c_str(), MainPath.c_str());
+				}
+				std::unique_lock<std::mutex> Lock(FileToLoad->FileLoadMutex);
+				FileToLoad->bHasLoadError = true;
+				return FileToLoad;
+			}
 
-		std::unique_lock<std::mutex> Lock(FileToLoad->FileLoadMutex);
-		FileToLoad->parent = includeParent ? shared_from_this() : nullptr;
-		FileToLoad->buffer = fileData;
-		FileToLoad->dwBufferSize = dwFileSize + 1;
-		FileToLoad->bIsLoaded = true;
+			if (!SFileCloseFile(fileHandle))
+			{
+				SPDLOG_ERROR("({}) Failed to close file {} from mpq archive {}", GetLastError(), filePath.c_str(), MainPath.c_str());
+			}
+
+			// Throw in a null terminator at the end incase we're loading a text file...
+			fileData[dwFileSize] = '\0';
+
+			std::unique_lock<std::mutex> Lock(FileToLoad->FileLoadMutex);
+			FileToLoad->parent = includeParent ? shared_from_this() : nullptr;
+			FileToLoad->buffer = fileData;
+			FileToLoad->dwBufferSize = dwFileSize + 1;
+			FileToLoad->bIsLoaded = true;
+		}
 
         return FileToLoad;
     }

@@ -21,3 +21,9 @@ Span<char> ReadAllBytes(const std::string& filePath)
 
     return Span<char>(buffer, fileSize);
 }
+
+bool FileExists(const std::string& filePath)
+{
+    std::ifstream file(filePath, std::ios::in | std::ios::binary | std::ios::ate);
+    return file.good();
+}

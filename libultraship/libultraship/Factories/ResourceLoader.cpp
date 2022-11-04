@@ -27,17 +27,14 @@ namespace Ship
         ResourceType resourceType;
 
         // Determine if file is binary or XML...
-        uint8_t firstByte = reader->ReadByte();
+        uint8_t firstByte = reader->ReadInt8();
 
-        for (int i = 0; i < 3; i++)
-            reader->ReadInt8();
         if (firstByte == '<')
         {
             // XML
             reader->Seek(-1, SeekOffsetType::Current);
 
-        reader->SetEndianness(endianness);
-            std::string xmlStr = reader->ReadStringNT();
+            std::string xmlStr = reader->ReadCString();
             
             tinyxml2::XMLDocument doc;
             tinyxml2::XMLError eResult = doc.Parse(xmlStr.data());
@@ -59,80 +56,83 @@ namespace Ship
             }
         }
         else
-        {            
+        {
             // Binary
-            Endianess endianess = (Endianess)firstByte;
+            Endianness endianness = (Endianness)firstByte;
 
             for (int i = 0; i < 3; i++)
-                reader->ReadByte();
+                reader->ReadInt8();
 
-            // OTRTODO: Setup the binaryreader to use the resource's endianess
-
+            reader->SetEndianness(endianness);
+            
             resourceType = (ResourceType)reader->ReadUInt32();
 
-        case ResourceType::Material:
-            result = MaterialFactory::ReadMaterial(reader.get());
-            break;
-        case ResourceType::Texture:
-            result = TextureFactory::ReadTexture(reader.get());
-            break;
-        case ResourceType::Room:
-            result = SceneFactory::ReadScene(reader.get());
-            break;
-        case ResourceType::CollisionHeader:
-            result = CollisionHeaderFactory::ReadCollisionHeader(reader.get());
-            break;
-        case ResourceType::DisplayList:
-            result = DisplayListFactory::ReadDisplayList(reader.get());
-            break;
-        case ResourceType::PlayerAnimation:
-            result = PlayerAnimationFactory::ReadPlayerAnimation(reader.get());
-            break;
-        case ResourceType::Skeleton:
-            result = SkeletonFactory::ReadSkeleton(reader.get());
-            break;
-        case ResourceType::SkeletonLimb:
-            result = SkeletonLimbFactory::ReadSkeletonLimb(reader.get());
-            break;
-        case ResourceType::Vertex:
-            result = VertexFactory::ReadVtx(reader.get());
-            break;
-        case ResourceType::Animation:
-            result = AnimationFactory::ReadAnimation(reader.get());
-            break;
-        case ResourceType::Cutscene:
-            result = CutsceneFactory::ReadCutscene(reader.get());
-            break;
-        case ResourceType::Array:
-            result = ArrayFactory::ReadArray(reader.get());
-            break;
-        case ResourceType::Path:
-            result = PathFactory::ReadPath(reader.get());
-            break;
-        case ResourceType::Text:
-            result = TextFactory::ReadText(reader.get());
-            break;
-        case ResourceType::Blob:
-            result = BlobFactory::ReadBlob(reader.get());
-            break;
-        case ResourceType::Matrix:
-            result = MtxFactory::ReadMtx(reader.get());
-            break;
-        case ResourceType::Audio:
-            result = AudioFactory::ReadAudio(reader.get());
-            break;
-        case ResourceType::AudioSample:
-            result = AudioSampleFactory::ReadAudioSample(reader.get());
-            break;
-        case ResourceType::AudioSoundFont:
-            result = AudioSoundFontFactory::ReadAudioSoundFont(reader.get());
-            break;
-        case ResourceType::AudioSequence:
-            result = AudioSequenceFactory::ReadAudioSequence(reader.get());
-            break;
-        default:
-            // RESOURCE TYPE NOT SUPPORTED
-            break;
+            switch (resourceType)
+            {
+            case ResourceType::Material:
+                result = MaterialFactory::ReadMaterial(reader.get());
+                break;
+            case ResourceType::Texture:
+                result = TextureFactory::ReadTexture(reader.get());
+                break;
+            case ResourceType::Room:
+                result = SceneFactory::ReadScene(reader.get());
+                break;
+            case ResourceType::CollisionHeader:
+                result = CollisionHeaderFactory::ReadCollisionHeader(reader.get());
+                break;
+            case ResourceType::DisplayList:
+                result = DisplayListFactory::ReadDisplayList(reader.get());
+                break;
+            case ResourceType::PlayerAnimation:
+                result = PlayerAnimationFactory::ReadPlayerAnimation(reader.get());
+                break;
+            case ResourceType::Skeleton:
+                result = SkeletonFactory::ReadSkeleton(reader.get());
+                break;
+            case ResourceType::SkeletonLimb:
+                result = SkeletonLimbFactory::ReadSkeletonLimb(reader.get());
+                break;
+            case ResourceType::Vertex:
+                result = VertexFactory::ReadVtx(reader.get());
+                break;
+            case ResourceType::Animation:
+                result = AnimationFactory::ReadAnimation(reader.get());
+                break;
+            case ResourceType::Cutscene:
+                result = CutsceneFactory::ReadCutscene(reader.get());
+                break;
+            case ResourceType::Array:
+                result = ArrayFactory::ReadArray(reader.get());
+                break;
+            case ResourceType::Path:
+                result = PathFactory::ReadPath(reader.get());
+                break;
+            case ResourceType::Text:
+                result = TextFactory::ReadText(reader.get());
+                break;
+            case ResourceType::Blob:
+                result = BlobFactory::ReadBlob(reader.get());
+                break;
+            case ResourceType::Matrix:
+                result = MtxFactory::ReadMtx(reader.get());
+                break;
+            case ResourceType::Audio:
+                result = AudioFactory::ReadAudio(reader.get());
+                break;
+            case ResourceType::AudioSample:
+                result = AudioSampleFactory::ReadAudioSample(reader.get());
+                break;
+            case ResourceType::AudioSoundFont:
+                result = AudioSoundFontFactory::ReadAudioSoundFont(reader.get());
+                break;
+            case ResourceType::AudioSequence:
+                result = AudioSequenceFactory::ReadAudioSequence(reader.get());
+                break;
+            default:
+                // RESOURCE TYPE NOT SUPPORTED
+                break;
+            }
         }
 
         if (result != nullptr) {

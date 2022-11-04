@@ -17,6 +17,7 @@ void Ship::TextV0::ParseFileXML(tinyxml2::XMLElement* reader, Resource* res)
 			entry.textboxType = child->IntAttribute("TextboxType");
 			entry.textboxYPos = child->IntAttribute("TextboxYPos");
 			entry.msg = child->Attribute("Message");
+			entry.msg += "\x2";
 
 			txt->messages.push_back(entry);
 			int bp = 0;
