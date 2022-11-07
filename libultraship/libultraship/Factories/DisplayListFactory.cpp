@@ -24,4 +24,25 @@ namespace Ship
         return dl;
 
     }
+    DisplayList* DisplayListFactory::ReadDisplayListXML(tinyxml2::XMLElement* reader)
+    {
+        DisplayList* dl = new DisplayList();
+
+        Version version = (Version)reader->IntAttribute("Version");
+
+        switch (version)
+        {
+        case Version::Deckard:
+        {
+            DisplayListV0 dlFac = DisplayListV0();
+            dlFac.ParseFileXML(reader, dl);
+        }
+        break;
+        default:
+            // VERSION NOT SUPPORTED
+            break;
+        }
+
+        return dl;
+    }
 }

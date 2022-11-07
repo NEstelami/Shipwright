@@ -17,6 +17,7 @@ namespace Ship {
 		uint32_t dwBufferSize;
 		bool bIsLoaded = false;
 		bool bHasLoadError = false;
+		std::shared_ptr<char[]> cachedData;
 		std::condition_variable FileLoadNotifier;
 		std::mutex FileLoadMutex;
 	};

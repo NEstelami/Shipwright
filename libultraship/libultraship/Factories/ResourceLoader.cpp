@@ -50,6 +50,16 @@ namespace Ship
                 result = TextFactory::ReadTextXML(root);
                 resourceType = ResourceType::Text;
             }
+            else if (nodeName == "Vertex")
+            {
+                result = VertexFactory::ReadVtxXML(root);
+                resourceType = ResourceType::Vertex;
+            }
+            else if (nodeName == "DisplayList")
+            {
+                result = DisplayListFactory::ReadDisplayListXML(root);
+                resourceType = ResourceType::DisplayList;
+            }
             else
             {
                 // RESOURCE TYPE NOT SUPPORTED

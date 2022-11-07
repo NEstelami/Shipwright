@@ -8,5 +8,6 @@ namespace Ship
 	{
 	public:
 		static Vertex* ReadVtx(BinaryReader* reader);
+		static Vertex* ReadVtxXML(tinyxml2::XMLElement* reader);
 	};
 }

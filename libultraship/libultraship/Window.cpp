@@ -39,6 +39,7 @@
 #elif defined(__WIIU__)
 #include "WiiUImpl.h"
 #endif
+#include <Lib/stb/stb_image.h>
 
 
 #define LOAD_TEX(texPath) static_cast<Ship::Texture*>(Ship::Window::GetInstance()->GetResourceManager()->LoadResource(texPath).get());
@@ -101,7 +102,15 @@ extern "C" {
     Vtx* ResourceMgr_LoadVtxByCRC(uint64_t crc) {
         const std::string* hashStr = Ship::Window::GetInstance()->GetResourceManager()->HashToString(crc);
 
-        if (hashStr != nullptr) {
+        if (hashStr != nullptr) 
+        {
+            auto vertResHack = std::dynamic_pointer_cast<Ship::Vertex>(Ship::Window::GetInstance()->GetResourceManager()->LoadResource(hashStr->c_str()));
+
+            if (vertResHack != nullptr)
+            {
+                return (Vtx*)vertResHack->vtxList.data();
+            }
+
             auto res = std::static_pointer_cast<Ship::Array>(Ship::Window::GetInstance()->GetResourceManager()->LoadResource(hashStr->c_str()));
             return (Vtx*)res->vertices.data();
         }
@@ -120,6 +129,16 @@ extern "C" {
         return nullptr;
     }
 
+    Gfx* ResourceMgr_LoadGfxByName(char* path) {
+        if (path != nullptr) {
+            auto res = std::static_pointer_cast<Ship::DisplayList>(Ship::Window::GetInstance()->GetResourceManager()->LoadResource(path));
+            return (Gfx*)&res->instructions[0];
+        }
+        else {
+            return nullptr;
+        }
+    }
+
     Gfx* ResourceMgr_LoadGfxByCRC(uint64_t crc) {
         const std::string* hashStr = Ship::Window::GetInstance()->GetResourceManager()->HashToString(crc);
 
@@ -134,7 +153,8 @@ extern "C" {
     char* ResourceMgr_LoadTexByCRC(uint64_t crc)  {
         const std::string* hashStr = Ship::Window::GetInstance()->GetResourceManager()->HashToString(crc);
 
-        if (hashStr != nullptr)  {
+        if (hashStr != nullptr)  
+        {
             const auto res = LOAD_TEX(hashStr->c_str());
             Ship::ExecuteHooks<Ship::LoadTexture>(hashStr->c_str(), &res->imageData);
 
@@ -162,6 +182,26 @@ extern "C" {
     }
 
     char* ResourceMgr_LoadTexByName(char* texPath) {
+        auto rawTexData = Ship::Window::GetInstance()->GetResourceManager()->LoadFile(texPath);
+
+        if (rawTexData != nullptr && rawTexData->bIsLoaded)
+        {
+            unsigned char* buffer = (unsigned char*)rawTexData.get()->buffer.get();
+            if (buffer[0] == 0x89 && buffer[1] == 'P' && buffer[2] == 'N' && buffer[3] == 'G')
+            {
+                if (rawTexData->cachedData != nullptr)
+                    return rawTexData->cachedData.get();
+
+                int w, h, comp;
+                unsigned char* pixels = stbi_load_from_memory((const unsigned char*)buffer, rawTexData.get()->dwBufferSize, &w, &h, &comp, STBI_rgb_alpha);
+                std::shared_ptr<char[]> pixelData(new char[w * h * 4]);
+                memcpy(pixelData.get(), pixels, w * h * 4);
+                stbi_image_free(pixels);
+                rawTexData->cachedData = pixelData;
+                return (char*)pixelData.get();
+            }
+        }
+
         const auto res = LOAD_TEX(texPath);
         Ship::ExecuteHooks<Ship::LoadTexture>(texPath, &res->imageData);
         return (char*)res->imageData;

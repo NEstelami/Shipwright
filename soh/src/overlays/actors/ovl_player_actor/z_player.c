@@ -347,6 +347,8 @@ static s32 D_80858AA4;
 static Vec3f D_80858AA8;
 static Input* sControlInput;
 
+static bool potSpawn = 0;
+
 // .data
 
 static u8 D_80853410[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
@@ -9545,6 +9547,8 @@ void Player_Init(Actor* thisx, GlobalContext* globalCtx2) {
     s32 sp50;
     s32 sp4C;
 
+    potSpawn = 0;
+
     globalCtx->shootingGalleryStatus = globalCtx->bombchuBowlingStatus = 0;
 
     globalCtx->playerInit = Player_InitCommon;
@@ -10907,6 +10911,13 @@ void Player_Update(Actor* thisx, GlobalContext* globalCtx) {
     Input sp44;
     Actor* dog;
 
+    // OTRTODO: VASE TEST
+    if (!potSpawn) {
+        Actor_Spawn(&gGlobalCtx->actorCtx, gGlobalCtx, ACTOR_EN_VASE, thisx->world.pos.x, thisx->world.pos.y + 32,
+                    thisx->world.pos.z, 0, 0, 0, 0);
+
+        potSpawn = 1;
+    }
     if (func_8084FCAC(this, globalCtx)) {
         if (gSaveContext.dogParams < 0) {
             if (Object_GetIndex(&globalCtx->objectCtx, OBJECT_DOG) < 0) {

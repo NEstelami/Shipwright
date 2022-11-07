@@ -89,7 +89,6 @@ namespace Ship {
 			std::shared_ptr<char[]> fileData(new char[byteData.Size() + 1]);
 			memcpy(fileData.get(), byteData.Data(), byteData.Size());
 
-
 			// Throw in a null terminator at the end incase we're loading a text file...
 			fileData[byteData.Size()] = '\0';
 
@@ -98,6 +97,7 @@ namespace Ship {
 			FileToLoad->buffer = fileData;
 			FileToLoad->dwBufferSize = byteData.Size() + 1;
 			FileToLoad->bIsLoaded = true;
+			FileToLoad->cachedData = nullptr;
 		}
 		else
 		{
@@ -141,6 +141,7 @@ namespace Ship {
 			FileToLoad->buffer = fileData;
 			FileToLoad->dwBufferSize = dwFileSize + 1;
 			FileToLoad->bIsLoaded = true;
+			FileToLoad->cachedData = nullptr;
 		}
 
         return FileToLoad;

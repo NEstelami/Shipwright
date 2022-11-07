@@ -7,5 +7,6 @@ namespace Ship
     {
     public:
         static DisplayList* ReadDisplayList(BinaryReader* reader);
+        static DisplayList* ReadDisplayListXML(tinyxml2::XMLElement* reader);
     };
 }

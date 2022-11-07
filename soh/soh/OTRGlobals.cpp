@@ -997,6 +997,12 @@ extern "C" CollisionHeader* ResourceMgr_LoadColByName(const char* path)
 
 extern "C" Vtx* ResourceMgr_LoadVtxByName(const char* path)
 {
+    auto vertResHack = std::dynamic_pointer_cast<Ship::Vertex>(ResourceMgr_LoadResource(path));
+
+    if (vertResHack != nullptr) {
+        return (Vtx*)vertResHack->vtxList.data();
+    }
+
     auto res = std::static_pointer_cast<Ship::Array>(ResourceMgr_LoadResource(path));
     return (Vtx*)res->vertices.data();
 }

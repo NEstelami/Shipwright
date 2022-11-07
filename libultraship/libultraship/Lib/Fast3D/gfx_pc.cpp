@@ -42,8 +42,10 @@
 extern "C" {
     const char* ResourceMgr_GetNameByCRC(uint64_t crc);
     int32_t* ResourceMgr_LoadMtxByCRC(uint64_t crc);
+    Vtx* ResourceMgr_LoadVtxByName(char* path);
     Vtx* ResourceMgr_LoadVtxByCRC(uint64_t crc);
     Gfx* ResourceMgr_LoadGfxByCRC(uint64_t crc);
+    Gfx* ResourceMgr_LoadGfxByName(char* path);
     char* ResourceMgr_LoadTexByCRC(uint64_t crc);
     void ResourceMgr_RegisterResourcePatch(uint64_t hash, uint32_t instrIndex, uintptr_t origData);
     char* ResourceMgr_LoadTexByName(char* texPath);
@@ -130,7 +132,7 @@ static struct RSP {
         uint16_t s, t;
     } texture_scaling_factor;
 
-    struct LoadedVertex loaded_vertices[MAX_VERTICES + 4];
+    struct LoadedVertex loaded_vertices[MAX_VERTICES + 4 + 4096];
 } rsp;
 
 static struct RDP {
@@ -1143,7 +1145,7 @@ static void gfx_sp_modify_vertex(uint16_t vtx_idx, uint8_t where, uint32_t val) 
     v->v = t;
 }
 
-static void gfx_sp_tri1(uint8_t vtx1_idx, uint8_t vtx2_idx, uint8_t vtx3_idx, bool is_rect) {
+static void gfx_sp_tri1(uint16_t vtx1_idx, uint16_t vtx2_idx, uint16_t vtx3_idx, bool is_rect) {
     struct LoadedVertex* v1 = &rsp.loaded_vertices[vtx1_idx];
     struct LoadedVertex* v2 = &rsp.loaded_vertices[vtx2_idx];
     struct LoadedVertex* v3 = &rsp.loaded_vertices[vtx3_idx];
@@ -2263,9 +2265,7 @@ static void gfx_run_dl(Gfx* cmd) {
                 uint64_t hash = ((uint64_t)cmd->words.w0 << 32) + cmd->words.w1;
 
 #if _DEBUG
-                //char fileName[4096];
-                //ResourceMgr_GetNameByCRC(hash, fileName);
-
+                //const char* fileName = ResourceMgr_GetNameByCRC(hash);
                 //printf("G_VTX_OTR: %s, 0x%08X\n", fileName, hash);
 #endif
                 if (offset > 0xFFFFF)
@@ -2295,6 +2295,18 @@ static void gfx_run_dl(Gfx* cmd) {
                 }
             }
                 break;
+            case G_VTX_OTR2:
+            {
+                char* fileName = (char*)cmd->words.w1;
+                cmd++;
+                int vtxCnt = cmd->words.w0;
+                int vtxOff = cmd->words.w1;
+                Vtx* vtx = ResourceMgr_LoadVtxByName(fileName);
+                vtx += vtxOff;
+                cmd--;
+                gfx_sp_vertex(vtxCnt, 0, vtx);
+            }
+            break;
             case G_MODIFYVTX:
                 gfx_sp_modify_vertex(C0(1, 15), C0(16, 8), cmd->words.w1);
                 break;
@@ -2311,6 +2323,21 @@ static void gfx_run_dl(Gfx* cmd) {
                     cmd = (Gfx *)seg_addr(cmd->words.w1);
                     --cmd; // increase after break
                 }
+                break;
+            case G_DL_OTR2:
+            {
+                fileName = (char*)cmd->words.w1;
+                Gfx* nDL = ResourceMgr_LoadGfxByName((char*)fileName);
+
+                if (C0(16, 1) == 0) {
+                    // Push return address
+                    gfx_run_dl(nDL);
+                }
+                else {
+                    cmd = nDL;
+                    --cmd; // increase after break
+                }
+            }
                 break;
             case G_DL_OTR:
                 if (C0(16, 1) == 0)
@@ -2398,6 +2425,14 @@ static void gfx_run_dl(Gfx* cmd) {
                 gfx_sp_tri1(C1(16, 8) / 10, C1(8, 8) / 10, C1(0, 8) / 10, false);
 #endif
                 break;
+            case (uint8_t)G_TRI1_OTR:
+            {
+                int v00 = cmd->words.w0 & 0x0000FFFF;
+                int v01 = cmd->words.w1 >> 16;
+                int v02 = cmd->words.w1 & 0x0000FFFF;
+                gfx_sp_tri1(v00, v01, v02, false);
+            }
+                break;
 #ifdef F3DEX_GBI_2
             case G_QUAD:
             {
@@ -2445,6 +2480,7 @@ static void gfx_run_dl(Gfx* cmd) {
                 cmd++;
                 uint64_t hash = ((uint64_t)cmd->words.w0 << 32) + (uint64_t)cmd->words.w1;
                 fileName = ResourceMgr_GetNameByCRC(hash);
+
 #if _DEBUG && 0
                 char* tex = ResourceMgr_LoadTexByCRC(hash);
                 ResourceMgr_GetNameByCRC(hash, fileName);
@@ -2485,8 +2521,23 @@ static void gfx_run_dl(Gfx* cmd) {
                     gfx_dp_set_texture_image(fmt, size, width, tex, fileName);
 
                 cmd++;
-                break;
             }
+                break;
+
+            case G_SETTIMG_OTR2:
+            {
+                fileName = (char*)cmd->words.w1;
+
+                char* tex = ResourceMgr_LoadTexByName((char*)fileName);
+                uint32_t fmt = C0(21, 3);
+                uint32_t size = C0(19, 2);
+                uint32_t width = C0(0, 10);
+
+                if (tex != NULL)
+                    gfx_dp_set_texture_image(fmt, size, width, tex, fileName);
+            }
+
+                break;
             case G_SETFB:
             {
                 gfx_flush();

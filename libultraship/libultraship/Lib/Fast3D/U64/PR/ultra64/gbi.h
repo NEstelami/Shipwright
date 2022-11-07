@@ -161,6 +161,10 @@
 #define	G_SETFB		            0x21
 #define	G_RESETFB		        0x22
 #define G_SETTIMG_FB            0x23
+#define G_VTX_OTR2			    0x24
+#define	G_SETTIMG_OTR2		    0x25
+#define G_TRI1_OTR              0x26
+#define G_DL_OTR2               0x27
 #define G_DL_OTR			    0x31
 #define G_VTX_OTR			    0x32
 #define G_MARKER			    0x33
@@ -1798,8 +1802,11 @@ _DW({                                   \
 #define __gSPDisplayList(pkt,dl)  gDma1p(pkt,G_DL,dl,0,G_DL_PUSH)
 #define gsSPDisplayList(   dl)  gsDma1p(   G_DL,dl,0,G_DL_PUSH)
 
+#define gsSPDisplayListOTR2(   dl)  gsDma1p(   G_DL_OTR2,dl,0,G_DL_PUSH)
+
 #define gSPBranchList(pkt,dl)   gDma1p(pkt,G_DL,dl,0,G_DL_NOPUSH)
 #define gsSPBranchList(   dl)   gsDma1p(   G_DL,dl,0,G_DL_NOPUSH)
+#define gsSPBranchListOTR2(   dl)   gsDma1p(   G_DL_OTR2,dl,0,G_DL_NOPUSH)
 
 #define gSPSprite2DBase(pkt, s) gDma1p(pkt, G_SPRITE2D_BASE, s, sizeof(uSprite), 0)
 #define gsSPSprite2DBase(s) gsDma1p(G_SPRITE2D_BASE, s, sizeof(uSprite), 0)
@@ -1976,6 +1983,12 @@ _DW({                                   \
 #define gsSP1Triangle(v0, v1, v2, flag)                 \
 {                                   \
     _SHIFTL(G_TRI1, 24, 8)|__gsSP1Triangle_w1f(v0, v1, v2, flag),   \
+    0                               \
+}
+
+#define gsSP1TriangleOTR(v0, v1, v2, flag)                 \
+{                                   \
+    _SHIFTL(G_TRI1_OTR, 24, 8)|__gsSP1Triangle_w1f(v0, v1, v2, flag),   \
     0                               \
 }
 

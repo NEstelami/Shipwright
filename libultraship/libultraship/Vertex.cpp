@@ -24,4 +24,36 @@ namespace Ship
 			vtx->vtxList.push_back(data);
 		}
 	}
+	void VertexV0::ParseFileXML(tinyxml2::XMLElement* reader, Resource* res)
+	{
+		Vertex* vtx = (Vertex*)res;
+
+		auto child = reader->FirstChildElement();
+
+		while (child != nullptr)
+		{
+			std::string childName = child->Name();
+
+			if (childName == "Vtx")
+			{
+				Vtx data;
+				data.x = child->IntAttribute("X");
+				data.y = child->IntAttribute("Y");
+				data.z = child->IntAttribute("Z");
+				data.flag = 0;
+				data.s = child->IntAttribute("S");
+				data.t = child->IntAttribute("T");
+				data.r = child->IntAttribute("R");
+				data.g = child->IntAttribute("G");
+				data.b = child->IntAttribute("B");
+				data.a = child->IntAttribute("A");
+
+				vtx->vtxList.push_back(data);
+			}
+
+			child = child->NextSiblingElement();
+		}
+
+		int bp = 0;
+	}
 }
