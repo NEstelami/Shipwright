@@ -115,6 +115,29 @@ namespace Ship
 			{
 				g = gsDPTileSync();
 			}
+			else if (childName == "LoadTile")
+			{
+				uint32_t t = child->IntAttribute("T");
+				uint32_t uls = child->IntAttribute("Uls");
+				uint32_t ult = child->IntAttribute("Ult");
+				uint32_t lrs = child->IntAttribute("Lrs");
+				uint32_t lrt = child->IntAttribute("Lrt");
+
+				g = gsDPLoadTile(t, uls, ult, lrs, lrt);
+			}
+			else if (childName == "SetTextureLUT")
+			{
+				uint32_t mode = child->IntAttribute("Mode");
+
+				g = gsDPSetTextureLUT(mode);
+			}
+			else if (childName == "LoadTLUTCmd")
+			{
+				uint32_t tile = child->IntAttribute("Tile");
+				uint32_t count = child->IntAttribute("Count");
+
+				g = gsDPLoadTLUTCmd(tile, count);
+			}
 			else if (childName == "SetCombineLERP")
 			{
 				const char* a0 = child->Attribute("A0", 0);
