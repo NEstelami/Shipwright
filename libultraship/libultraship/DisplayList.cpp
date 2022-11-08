@@ -115,18 +115,6 @@ namespace Ship
 			{
 				g = gsDPTileSync();
 			}
-			else if (childName == "Triangle1")
-			{
-				int v00 = child->IntAttribute("V00");
-				int v01 = child->IntAttribute("V01");
-				int v02 = child->IntAttribute("V02");
-
-				g = gsSP1TriangleOTR(child->IntAttribute("V00"), child->IntAttribute("V01"), child->IntAttribute("V02"), child->IntAttribute("Flag0"));
-				g.words.w0 &= 0xFF000000;
-				g.words.w0 |= v00;
-				g.words.w1 |= v01 << 16;
-				g.words.w1 |= v02 << 0;
-			}
 			else if (childName == "SetCombineLERP")
 			{
 				const char* a0 = child->Attribute("A0", 0);
@@ -149,11 +137,14 @@ namespace Ship
 				const char* ac1 = child->Attribute("Ac1", 0);
 				const char* ad1 = child->Attribute("Ad1", 0);
 
-				// OTRTODO: Figure out how to implement this without it looking like hell...
-				//g = gsDPSetCombineLERP(a0, b0, c0, d0, aa0, ab0, ac0, ad0, a1, b1, c1, d1, aa1, ab1, ac1, ad1);
+				// OTRTODO: This should work fine but we're getting some weird results...
+				g = gsDPSetCombineLERP2(GetCombineLERPValue(a0), GetCombineLERPValue(b0), GetCombineLERPValue(c0), GetCombineLERPValue(d0), 
+					GetCombineLERPValue(aa0), GetCombineLERPValue(ab0), GetCombineLERPValue(ac0), GetCombineLERPValue(ad0), GetCombineLERPValue(a1), 
+					GetCombineLERPValue(b1), GetCombineLERPValue(c1), GetCombineLERPValue(d1), GetCombineLERPValue(aa1), GetCombineLERPValue(ab1), 
+					GetCombineLERPValue(ac1), GetCombineLERPValue(ad1));
 				
 				// For now this is temp...
-				g = gsDPSetCombineLERP(1, TEXEL0, PRIMITIVE, TEXEL0, 0, 0, 0, 1, COMBINED, 0, SHADE, 0, 0, 0, 0, COMBINED);
+				//g = gsDPSetCombineLERP(1, TEXEL0, PRIMITIVE, TEXEL0, 0, 0, 0, 1, COMBINED, 0, SHADE, 0, 0, 0, 0, COMBINED);
 			}
 			else if (childName == "LoadSync")
 			{
@@ -168,6 +159,18 @@ namespace Ship
 				uint32_t dxt = child->IntAttribute("Dxt");
 
 				g = gsDPLoadBlock(tile, uls, ult, lrs, dxt);
+			}
+			else if (childName == "Triangle1")
+			{
+				int v00 = child->IntAttribute("V00");
+				int v01 = child->IntAttribute("V01");
+				int v02 = child->IntAttribute("V02");
+
+				g = gsSP1TriangleOTR(child->IntAttribute("V00"), child->IntAttribute("V01"), child->IntAttribute("V02"), child->IntAttribute("Flag0"));
+				g.words.w0 &= 0xFF000000;
+				g.words.w0 |= v00;
+				g.words.w1 |= v01 << 16;
+				g.words.w1 |= v02 << 0;
 			}
 			else if (childName == "Triangles2")
 			{
@@ -484,5 +487,19 @@ namespace Ship
 
 			child = child->NextSiblingElement();
 		}
+	}
+
+	uint32_t DisplayListV0::GetCombineLERPValue(std::string valStr)
+	{
+		std::string strings[] = { "G_CCMUX_COMBINED", "G_CCMUX_TEXEL0", "G_CCMUX_TEXEL1", "G_CCMUX_PRIMITIVE", "G_CCMUX_SHADE", "G_CCMUX_ENVIRONMENT", "G_CCMUX_1", "G_CCMUX_NOISE", "G_CCMUX_0", "G_CCMUX_CENTER", "G_CCMUX_K4", "G_CCMUX_SCALE", "G_CCMUX_COMBINED_ALPHA", "G_CCMUX_TEXEL0_ALPHA", "G_CCMUX_TEXEL1_ALPHA", "G_CCMUX_PRIMITIVE_ALPHA", "G_CCMUX_SHADE_ALPHA", "G_CCMUX_ENV_ALPHA", "G_CCMUX_LOD_FRACTION", "G_CCMUX_PRIM_LOD_FRAC", "G_CCMUX_K5", "G_ACMUX_COMBINED", "G_ACMUX_TEXEL0", "G_ACMUX_TEXEL1", "G_ACMUX_PRIMITIVE", "G_ACMUX_SHADE", "G_ACMUX_ENVIRONMENT", "G_ACMUX_1", "G_ACMUX_0", "G_ACMUX_LOD_FRACTION", "G_ACMUX_PRIM_LOD_FRAC" };
+		uint32_t values[] = { G_CCMUX_COMBINED, G_CCMUX_TEXEL0, G_CCMUX_TEXEL1, G_CCMUX_PRIMITIVE, G_CCMUX_SHADE, G_CCMUX_ENVIRONMENT, G_CCMUX_1, G_CCMUX_NOISE, G_CCMUX_0, G_CCMUX_CENTER, G_CCMUX_K4, G_CCMUX_SCALE, G_CCMUX_COMBINED_ALPHA, G_CCMUX_TEXEL0_ALPHA, G_CCMUX_TEXEL1_ALPHA, G_CCMUX_PRIMITIVE_ALPHA, G_CCMUX_SHADE_ALPHA, G_CCMUX_ENV_ALPHA, G_CCMUX_LOD_FRACTION, G_CCMUX_PRIM_LOD_FRAC, G_CCMUX_K5, G_ACMUX_COMBINED, G_ACMUX_TEXEL0, G_ACMUX_TEXEL1, G_ACMUX_PRIMITIVE, G_ACMUX_SHADE, G_ACMUX_ENVIRONMENT, G_ACMUX_1, G_ACMUX_0, G_ACMUX_LOD_FRACTION, G_ACMUX_PRIM_LOD_FRAC };
+		
+		for (int i = 0; i < ARRAYSIZE(values); i++)
+		{
+			if (valStr == strings[i])
+				return values[i];
+		}
+
+		return G_CCMUX_1;
 	}
 }

@@ -14,6 +14,8 @@ namespace Ship
 	public:
 		void ParseFileBinary(BinaryReader* reader, Resource* res) override;
 		void ParseFileXML(tinyxml2::XMLElement* reader, Resource* res) override;
+
+		uint32_t GetCombineLERPValue(std::string valStr);
 	};
 
     class DisplayList : public Resource
