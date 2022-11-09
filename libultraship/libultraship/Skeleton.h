@@ -16,6 +16,7 @@ namespace Ship
 	{
 	public:
 		void ParseFileBinary(BinaryReader* reader, Resource* res) override;
+		void ParseFileXML(tinyxml2::XMLElement* reader, Resource* res) override;
 	};
 
 	class Skeleton : public Resource

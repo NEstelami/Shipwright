@@ -169,13 +169,37 @@ namespace Ship
 			else if (childName == "Matrix")
 			{
 				std::string fName = child->Attribute("Path");
-				uint32_t param = child->IntAttribute("Param");
-				g = { gsSPMatrix(0, param) };
+				std::string param = child->Attribute("Param");
 
-				g.words.w0 &= 0x00FFFFFF;
-				g.words.w0 += (G_MTX_OTR2 << 24);
-				g.words.w1 = (uintptr_t)malloc(fName.size() + 1);
-				strcpy((char*)g.words.w1, fName.data());
+				uint8_t paramInt = 0;
+
+				if (param == "G_MTX_PUSH")
+					paramInt = G_MTX_PUSH;
+				else if (param == "G_MTX_NOPUSH")
+					paramInt = G_MTX_NOPUSH;
+				else if (param == "G_MTX_LOAD")
+					paramInt = G_MTX_LOAD;
+				else if (param == "G_MTX_MUL")
+					paramInt = G_MTX_MUL;
+				else if (param == "G_MTX_MODELVIEW")
+					paramInt = G_MTX_MODELVIEW;
+				else if (param == "G_MTX_PROJECTION")
+					paramInt = G_MTX_PROJECTION;
+
+				if (fName[0] == '>' && fName[1] == '0' && fName[2] == 'x')
+				{
+					int offset = strtol(fName.c_str() + 1, NULL, 16);
+					g = gsSPMatrix(offset | 1, paramInt);
+				}
+				else
+				{
+					g = { gsSPMatrix(0, paramInt) };
+
+					g.words.w0 &= 0x00FFFFFF;
+					g.words.w0 += (G_MTX_OTR2 << 24);
+					g.words.w1 = (uintptr_t)malloc(fName.size() + 1);
+					strcpy((char*)g.words.w1, fName.data());
+				}
 			}
 			else if (childName == "SetCycleType")
 			{
@@ -300,7 +324,7 @@ namespace Ship
 			{
 				std::string fName = child->Attribute("Path");
 				//fName = ">" + fName;
-				g = { gsSPVertex(0, child->IntAttribute("Count"), child->IntAttribute("Index")) };
+				g = { gsSPVertex(0, child->IntAttribute("Count"), child->IntAttribute("VertexBufferIndex"), child->IntAttribute("VertexOffset")) };
 
 				g.words.w0 &= 0x00FFFFFF;
 				g.words.w0 += (G_VTX_OTR2 << 24);
@@ -311,17 +335,46 @@ namespace Ship
 				dl->instructions.push_back(g.words.w1);
 
 				g.words.w0 = child->IntAttribute("Count");
-				g.words.w1 = child->IntAttribute("Index");
+				g.words.w1 = (child->IntAttribute("VertexBufferIndex") << 16) + child->IntAttribute("VertexOffset");
 			}
 			else if (childName == "SetTextureImage")
 			{
 				std::string fName = child->Attribute("Path");
 				//fName = ">" + fName;
-				uint32_t fmt = child->IntAttribute("Format");
-				uint32_t siz = child->IntAttribute("Size");
+				std::string fmt = child->Attribute("Format");
+				uint32_t fmtVal = G_IM_FMT_RGBA;
+
+				if (fmt == "G_IM_FMT_I")
+					fmtVal = G_IM_FMT_I;
+				else if (fmt == "G_IM_FMT_IA")
+					fmtVal = G_IM_FMT_IA;
+				else if (fmt == "G_IM_FMT_CI")
+					fmtVal = G_IM_FMT_CI;
+				else if (fmt == "G_IM_FMT_YUV")
+					fmtVal = G_IM_FMT_YUV;
+				else if (fmt == "G_IM_FMT_RGBA")
+					fmtVal = G_IM_FMT_RGBA;
+
+
+				std::string siz = child->Attribute("Size");
+				uint32_t sizVal = G_IM_SIZ_32b;
+				
+				if (siz == "G_IM_SIZ_8b_LOAD_BLOCK")
+					sizVal = G_IM_SIZ_8b_LOAD_BLOCK;
+				else if (siz == "G_IM_SIZ_4b")
+					sizVal = G_IM_SIZ_4b;
+				else if (siz == "G_IM_SIZ_8b")
+					sizVal = G_IM_SIZ_8b;
+				else if (siz == "G_IM_SIZ_16b")
+					sizVal = G_IM_SIZ_16b;
+				else if (siz == "G_IM_SIZ_32b")
+					sizVal = G_IM_SIZ_32b;
+				else if (siz == "G_IM_SIZ_DD")
+					sizVal = G_IM_SIZ_DD;
+				
 				uint32_t width = child->IntAttribute("Width");
 
-				g = { gsDPSetTextureImage(fmt, siz, width + 1, 0) };
+				g = { gsDPSetTextureImage(fmtVal, sizVal, width + 1, 0) };
 				g.words.w0 &= 0x00FFFFFF;
 				g.words.w0 += (G_SETTIMG_OTR2 << 24);
 				g.words.w1 = (uintptr_t)malloc(fName.size() + 1);
@@ -334,8 +387,8 @@ namespace Ship
 			}
 			else if (childName == "SetTile")
 			{
-				uint32_t fmt = child->IntAttribute("Format");
-				uint32_t siz = child->IntAttribute("Size");
+				//uint32_t fmt = child->IntAttribute("Format");
+				//uint32_t siz = child->IntAttribute("Size");
 				uint32_t line = child->IntAttribute("Line");
 				uint32_t tmem = child->IntAttribute("TMem");
 				uint32_t tile = child->IntAttribute("Tile");
@@ -346,8 +399,42 @@ namespace Ship
 				uint32_t maskT = child->IntAttribute("MaskT");
 				uint32_t shiftS = child->IntAttribute("ShiftS");
 				uint32_t shiftT = child->IntAttribute("ShiftT");
+
+				std::string fmt = child->Attribute("Format");
+				uint32_t fmtVal = G_IM_FMT_RGBA;
+
+				if (fmt == "G_IM_FMT_I")
+					fmtVal = G_IM_FMT_I;
+				else if (fmt == "G_IM_FMT_IA")
+					fmtVal = G_IM_FMT_IA;
+				else if (fmt == "G_IM_FMT_CI")
+					fmtVal = G_IM_FMT_CI;
+				else if (fmt == "G_IM_FMT_YUV")
+					fmtVal = G_IM_FMT_YUV;
+				else if (fmt == "G_IM_FMT_RGBA")
+					fmtVal = G_IM_FMT_RGBA;
+
+
+				std::string siz = child->Attribute("Size");
+				uint32_t sizVal = G_IM_SIZ_32b;
+
+				if (siz == "G_IM_SIZ_8b_LOAD_BLOCK")
+					sizVal = G_IM_SIZ_8b_LOAD_BLOCK;
+				else if (siz == "G_IM_SIZ_4b")
+					sizVal = G_IM_SIZ_4b;
+				else if (siz == "G_IM_SIZ_8b")
+					sizVal = G_IM_SIZ_8b;
+				else if (siz == "G_IM_SIZ_16b")
+					sizVal = G_IM_SIZ_16b;
+				else if (siz == "G_IM_SIZ_32b")
+					sizVal = G_IM_SIZ_32b;
+				else if (siz == "G_IM_SIZ_DD")
+					sizVal = G_IM_SIZ_DD;
+
+				//fmt = G_IM_FMT_I;
+				//siz = G_IM_SIZ_8b_LOAD_BLOCK;
 				
-				g = gsDPSetTile(fmt, siz, line, tmem, tile, palette, cmt0, maskT, shiftT, cmt1, maskS, shiftS);
+				g = gsDPSetTile(fmtVal, sizVal, line, tmem, tile, palette, cmt0, maskT, shiftT, cmt1, maskS, shiftS);
 			}
 			else if (childName == "SetTileSize")
 			{

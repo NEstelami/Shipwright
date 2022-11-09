@@ -7,5 +7,6 @@ namespace Ship
     {
     public:
         static SkeletonLimb* ReadSkeletonLimb(BinaryReader* reader);
+        static SkeletonLimb* ReadSkeletonLimbXML(tinyxml2::XMLElement* reader);
     };
 }

@@ -23,4 +23,26 @@ namespace Ship
 
         return skel;
     }
+    
+    Skeleton* SkeletonFactory::ReadSkeletonXML(tinyxml2::XMLElement* reader)
+    {
+        Skeleton* skel = new Skeleton();
+
+        Version version = (Version)reader->IntAttribute("Version");
+
+        switch (version)
+        {
+        case Version::Deckard:
+        {
+            SkeletonV0 skelFac = SkeletonV0();
+            skelFac.ParseFileXML(reader, skel);
+        }
+        break;
+        default:
+            // VERSION NOT SUPPORTED
+            break;
+        }
+
+        return skel;
+    }
 }

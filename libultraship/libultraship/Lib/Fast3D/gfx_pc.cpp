@@ -2322,11 +2322,12 @@ static void gfx_run_dl(Gfx* cmd) {
                 char* fileName = GetPathWithCurrentDir((char*)cmd->words.w1);
                 cmd++;
                 int vtxCnt = cmd->words.w0;
-                int vtxOff = cmd->words.w1;
+                int vtxIdxOff = cmd->words.w1 >> 16;
+                int vtxDataOff = cmd->words.w1 & 0xFFFF;
                 Vtx* vtx = ResourceMgr_LoadVtxByName(fileName);
-                vtx += vtxOff;
+                vtx += vtxDataOff;
                 cmd--;
-                gfx_sp_vertex(vtxCnt, 0, vtx);
+                gfx_sp_vertex(vtxCnt, vtxIdxOff, vtx);
             }
             break;
             case G_MODIFYVTX:

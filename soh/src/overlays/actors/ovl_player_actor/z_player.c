@@ -10913,8 +10913,8 @@ void Player_Update(Actor* thisx, GlobalContext* globalCtx) {
 
     // OTRTODO: VASE TEST
     if (!potSpawn) {
-        Actor_Spawn(&gGlobalCtx->actorCtx, gGlobalCtx, ACTOR_EN_VASE, thisx->world.pos.x, thisx->world.pos.y + 32,
-                    thisx->world.pos.z, 0, 0, 0, 0);
+        //Actor_Spawn(&gGlobalCtx->actorCtx, gGlobalCtx, ACTOR_EN_VASE, thisx->world.pos.x, thisx->world.pos.y + 32, thisx->world.pos.z, 0, 0, 0, 0);
+        //Actor_Spawn(&gGlobalCtx->actorCtx, gGlobalCtx, ACTOR_EN_GELDB, thisx->world.pos.x, thisx->world.pos.y + 32, thisx->world.pos.z, 0, 0, 0, 0);
 
         potSpawn = 1;
     }
@@ -11126,6 +11126,9 @@ void Player_Draw(Actor* thisx, GlobalContext* globalCtx2) {
     rot.x = rot.z = 0;
 
     OPEN_DISPS(globalCtx->state.gfxCtx);
+
+    // OTRTODO
+    gsSPPushCD(POLY_OPA_DISP++, "objects/object_link_boy/t");
 
     if (!(this->stateFlags2 & PLAYER_STATE2_29)) {
         OverrideLimbDrawOpa overrideLimbDraw = func_80090014;

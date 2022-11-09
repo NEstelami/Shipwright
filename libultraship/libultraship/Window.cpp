@@ -25,6 +25,7 @@
 #include "Lib/Fast3D/gfx_gx2.h"
 #include "Lib/Fast3D/gfx_rendering_api.h"
 #include "Lib/Fast3D/gfx_window_manager_api.h"
+#include "../ZAPDUtils/Utils/StringHelper.h"
 #include <SDL2/SDL.h>
 #include "ImGuiImpl.h"
 #include "spdlog/async.h"
@@ -201,14 +202,63 @@ extern "C" {
                 unsigned char* pixels = stbi_load_from_memory((const unsigned char*)buffer, rawTexData.get()->dwBufferSize, &w, &h, &comp, STBI_rgb_alpha);
                 std::shared_ptr<char[]> pixelData(new char[w * h * 4]);
                 memcpy(pixelData.get(), pixels, w * h * 4);
-                stbi_image_free(pixels);
                 rawTexData->cachedData = pixelData;
+                
+                if (StringHelper::EndsWith(texPath, "_rgba16"))
+                {
+                    for (size_t pos = 0; pos < w * h * 4; pos += 4)
+                    {
+                        uint8_t r = pixels[pos + 0];
+                        uint8_t g = pixels[pos + 1];
+                        uint8_t b = pixels[pos + 2];
+                        uint8_t a = pixels[pos + 3];
+
+                        uint8_t nR = r / 8;
+                        uint8_t nG = g / 8;
+                        uint8_t nB = b / 8;
+                        uint8_t alphaBit = a != 0;
+
+                        uint16_t data = (nR << 11) + (nG << 6) + (nB << 1) + alphaBit;
+
+                        pixelData[(pos / 4) + 0] = (data & 0xFF00) >> 8;
+                        pixelData[(pos / 4) + 1] = (data & 0x00FF);
+                    }
+                }
+                else if (StringHelper::EndsWith(texPath, "_i8"))
+                {
+                    for (size_t pos = 0; pos < w * h * 4; pos += 4)
+                    {
+                        uint8_t r = pixels[pos + 0];
+
+                        uint8_t nR = r / 8;
+
+                        pixelData[(pos / 4) + 0] = nR;
+                    }
+                }
+
+            stbi_image_free(pixels);
+
+                
                 return (char*)pixelData.get();
             }
         }
 
         const auto res = LOAD_TEX(texPath);
         Ship::ExecuteHooks<Ship::LoadTexture>(texPath, &res->imageData);
+
+        if (res == nullptr)
+        {
+            char texData[4096];
+
+            for (int i = 0; i < 4096; i++)
+                texData[i] = i;
+
+            //return texData;
+
+            return ResourceMgr_LoadTexByName((char*)"objects/placeholder");
+        }
+
+
         return (char*)res->imageData;
     }
 

@@ -60,6 +60,16 @@ namespace Ship
                 result = DisplayListFactory::ReadDisplayListXML(root);
                 resourceType = ResourceType::DisplayList;
             }
+            else if (nodeName == "Skeleton")
+            {
+                result = SkeletonFactory::ReadSkeletonXML(root);
+                resourceType = ResourceType::Skeleton;
+            }
+            else if (nodeName == "SkeletonLimb")
+            {
+                result = SkeletonLimbFactory::ReadSkeletonLimbXML(root);
+                resourceType = ResourceType::SkeletonLimb;
+            }
             else
             {
                 // RESOURCE TYPE NOT SUPPORTED
