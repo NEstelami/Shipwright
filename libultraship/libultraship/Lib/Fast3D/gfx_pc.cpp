@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <vector>
 #include <list>
+#include <stack>
 
 #ifndef _LANGUAGE_C
 #define _LANGUAGE_C
@@ -53,6 +54,7 @@ extern "C" {
 }
 
 uintptr_t gfxFramebuffer;
+std::stack<std::string> currentDir;
 
 using namespace std;
 
@@ -240,6 +242,31 @@ static unsigned long get_time(void) {
     return (unsigned long)ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
 }
 #endif
+
+static std::string GetPathWithoutFileName(char* filePath)
+{
+    int len = strlen(filePath);
+
+    for (int i = len - 1; i >= 0; i--)
+    {
+        if (filePath[i] == '/' || filePath[i] == '\\')
+        {
+            return std::string(filePath).substr(0, i);
+        }
+    }
+}
+
+static char* GetPathWithCurrentDir(char* filePath)
+{
+    static char fullPath[4096]; // OTRTODO: This is probably a bad idea...
+    if (filePath[0] == '>')
+    {
+        sprintf(fullPath, "%s/%s", currentDir.top().c_str(), &filePath[1]);
+        return fullPath;
+    }
+    else
+        return filePath;
+}
 
 static void gfx_flush(void) {
     if (buf_vbo_len > 0) {
@@ -1341,11 +1368,6 @@ static void gfx_sp_tri1(uint16_t vtx1_idx, uint16_t vtx2_idx, uint16_t vtx3_idx,
             z = (z + w) / 2.0f;
         }
 
-        if (markerOn)
-        {
-            //z = 10;
-        }
-
         buf_vbo[buf_vbo_len++] = v_arr[i]->x;
         buf_vbo[buf_vbo_len++] = clip_parameters.invert_y ? -v_arr[i]->y : v_arr[i]->y;
         buf_vbo[buf_vbo_len++] = z;
@@ -1774,7 +1796,7 @@ static void gfx_dp_load_tile(uint8_t tile, uint32_t uls, uint32_t ult, uint32_t 
     rdp.loaded_texture[rdp.texture_tile[tile].tmem_index].full_image_line_size_bytes = full_image_line_size_bytes;
     rdp.loaded_texture[rdp.texture_tile[tile].tmem_index].line_size_bytes = line_size_bytes;
 
-    assert(size_bytes <= 4096 && "bug: too big texture");
+    //assert(size_bytes <= 4096 && "bug: too big texture");
     rdp.loaded_texture[rdp.texture_tile[tile].tmem_index].addr = rdp.texture_to_load.addr + start_offset;
     rdp.loaded_texture[rdp.texture_tile[tile].tmem_index].otr_path = rdp.texture_to_load.otr_path;
     rdp.texture_tile[tile].uls = uls;
@@ -2297,7 +2319,7 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             case G_VTX_OTR2:
             {
-                char* fileName = (char*)cmd->words.w1;
+                char* fileName = GetPathWithCurrentDir((char*)cmd->words.w1);
                 cmd++;
                 int vtxCnt = cmd->words.w0;
                 int vtxOff = cmd->words.w1;
@@ -2326,12 +2348,14 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             case G_DL_OTR2:
             {
-                fileName = (char*)cmd->words.w1;
+                fileName = GetPathWithCurrentDir((char*)cmd->words.w1);
                 Gfx* nDL = ResourceMgr_LoadGfxByName((char*)fileName);
 
                 if (C0(16, 1) == 0) {
                     // Push return address
+                    currentDir.push(GetPathWithoutFileName((char*)fileName));
                     gfx_run_dl(nDL);
+                    currentDir.pop();
                 }
                 else {
                     cmd = nDL;
@@ -2365,6 +2389,9 @@ static void gfx_run_dl(Gfx* cmd) {
                     cmd++;
                     --cmd; // increase after break
                 }
+                break;
+            case G_PUSHCD:
+                gfx_push_current_dir((char*)cmd->words.w1);
                 break;
             case G_BRANCH_Z_OTR:
             {
@@ -2526,7 +2553,7 @@ static void gfx_run_dl(Gfx* cmd) {
 
             case G_SETTIMG_OTR2:
             {
-                fileName = (char*)cmd->words.w1;
+                fileName = GetPathWithCurrentDir((char*)cmd->words.w1);
 
                 char* tex = ResourceMgr_LoadTexByName((char*)fileName);
                 uint32_t fmt = C0(21, 3);
@@ -2860,6 +2887,7 @@ void gfx_run(Gfx *commands, const std::unordered_map<Mtx *, MtxF>& mtx_replaceme
     gfx_run_dl(commands);
     gfx_flush();
     gfxFramebuffer = 0;
+    currentDir.empty();
     if (game_renders_to_framebuffer) {
         gfx_rapi->start_draw_to_framebuffer(0, 1);
         gfx_rapi->clear_framebuffer();
@@ -2951,4 +2979,12 @@ uint16_t gfx_get_pixel_depth(float x, float y) {
     get_pixel_depth_pending.clear();
 
     return get_pixel_depth_cached.find(make_pair(x, y))->second;
+}
+
+void gfx_push_current_dir(char* path)
+{
+    if (ResourceMgr_OTRSigCheck(path) == 1)
+        path = &path[7];
+
+    currentDir.push(GetPathWithoutFileName(path));
 }

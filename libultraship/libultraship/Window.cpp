@@ -181,7 +181,12 @@ extern "C" {
         }
     }
 
-    char* ResourceMgr_LoadTexByName(char* texPath) {
+    char* ResourceMgr_LoadTexByName(char* texPath) 
+    {
+        if (texPath[0] == '_' && texPath[1] == '_' && texPath[2] == 'O' && texPath[3] == 'T' && texPath[4] == 'R' && texPath[5] == '_' && texPath[6] == '_') {
+            texPath += 7;
+        }
+
         auto rawTexData = Ship::Window::GetInstance()->GetResourceManager()->LoadFile(texPath);
 
         if (rawTexData != nullptr && rawTexData->bIsLoaded)

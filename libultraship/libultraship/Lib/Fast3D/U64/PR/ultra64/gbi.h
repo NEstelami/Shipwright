@@ -165,6 +165,8 @@
 #define	G_SETTIMG_OTR2		    0x25
 #define G_TRI1_OTR              0x26
 #define G_DL_OTR2               0x27
+#define G_PUSHCD                0x28
+#define G_MTX_OTR2              0x29
 #define G_DL_OTR			    0x31
 #define G_VTX_OTR			    0x32
 #define G_MARKER			    0x33
@@ -1799,6 +1801,7 @@ _DW({                                   \
         gsDma1p(      G_MOVEMEM, (v), sizeof(Vp), G_MV_VIEWPORT)
 #endif  /* F3DEX_GBI_2 */
 
+#define gsSPPushCD(pkt,dl)  gDma1p(pkt,G_PUSHCD,dl,0,G_DL_PUSH)
 #define __gSPDisplayList(pkt,dl)  gDma1p(pkt,G_DL,dl,0,G_DL_PUSH)
 #define gsSPDisplayList(   dl)  gsDma1p(   G_DL,dl,0,G_DL_PUSH)
 

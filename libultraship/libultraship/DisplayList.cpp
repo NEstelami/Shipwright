@@ -65,7 +65,7 @@ namespace Ship
 		{
 			std::string childName = child->Name();
 
-			Gfx g;
+			Gfx g = gsDPPipeSync();
 
 			if (childName == "PipeSync")
 			{
@@ -80,6 +80,102 @@ namespace Ship
 			{
 				g = gsDPSetPrimColor(child->IntAttribute("MinLevel"), child->IntAttribute("LodFrac"), child->IntAttribute("R"),
 					child->IntAttribute("G"), child->IntAttribute("B"), child->IntAttribute("A"));
+			}
+			else if (childName == "SetPrimDepth")
+			{
+				g = gsDPSetPrimDepth(child->IntAttribute("Z"), child->IntAttribute("DZ"));
+			}
+			else if (childName == "SetFillColor")
+			{
+				g = gsDPSetFillColor(child->IntAttribute("C"));
+			}
+			else if (childName == "SetFogColor")
+			{
+				g = gsDPSetFogColor(child->IntAttribute("R"), child->IntAttribute("G"), child->IntAttribute("B"), child->IntAttribute("A"));
+			}
+			else if (childName == "SetBlendColor")
+			{
+				g = gsDPSetBlendColor(child->IntAttribute("R"), child->IntAttribute("G"), child->IntAttribute("B"), child->IntAttribute("A"));
+			}
+			else if (childName == "SetEnvColor")
+			{
+				g = gsDPSetEnvColor(child->IntAttribute("R"), child->IntAttribute("G"), child->IntAttribute("B"), child->IntAttribute("A"));
+			}
+			else if (childName == "SetDepthSource")
+			{
+				g = gsDPSetDepthSource(child->IntAttribute("Mode"));
+			}
+			else if (childName == "SetAlphaCompare")
+			{
+				g = gsDPSetAlphaCompare(child->IntAttribute("Mode"));
+			}
+			else if (childName == "SetAlphaDither")
+			{
+				g = gsDPSetAlphaDither(child->IntAttribute("Type"));
+			}
+			else if (childName == "SetColorDither")
+			{
+				g = gsDPSetColorDither(child->IntAttribute("Type"));
+			}
+			else if (childName == "SetCombineKey")
+			{
+				g = gsDPSetCombineKey(child->IntAttribute("Type"));
+			}
+			else if (childName == "SetTextureFilter")
+			{
+				g = gsDPSetTextureFilter(child->IntAttribute("Mode"));
+			}
+			else if (childName == "SetTextureLOD")
+			{
+				g = gsDPSetTextureLOD(child->IntAttribute("Mode"));
+			}
+			else if (childName == "SetTextureDetail")
+			{
+				g = gsDPSetTextureDetail(child->IntAttribute("Type"));
+			}
+			else if (childName == "SetTexturePersp")
+			{
+				g = gsDPSetTexturePersp(child->IntAttribute("Enable"));
+			}
+			else if (childName == "PerspNormalize")
+			{
+				g = gsSPPerspNormalize(child->IntAttribute("S"));
+			}
+			else if (childName == "FogPosition")
+			{
+				g = gsSPFogPosition(child->IntAttribute("Min"), child->IntAttribute("Max"));
+			}
+			else if (childName == "FogFactor")
+			{
+				g = gsSPFogFactor(child->IntAttribute("FM"), child->IntAttribute("FO"));
+			}
+			else if (childName == "NumLites")
+			{
+				g = gsSPNumLights(child->IntAttribute("Lites"));
+			}
+			else if (childName == "Segment")
+			{
+				g = gsSPSegment(child->IntAttribute("Seg"), child->IntAttribute("Base"));
+			}
+			/*else if (childName == "Line3D")
+			{
+				g = gsSPLine3D(child->IntAttribute("V0"), child->IntAttribute("V1"), child->IntAttribute("Flag"));
+			}
+			*/
+			/*else if (childName == "Hilite2Tile")
+			{
+				g = gsDPSetHilite2Tile(child->IntAttribute("Tile"), child->IntAttribute("Hilite"), child->IntAttribute("Width"), child->IntAttribute("Height"));
+			}*/
+			else if (childName == "Matrix")
+			{
+				std::string fName = child->Attribute("Path");
+				uint32_t param = child->IntAttribute("Param");
+				g = { gsSPMatrix(0, param) };
+
+				g.words.w0 &= 0x00FFFFFF;
+				g.words.w0 += (G_MTX_OTR2 << 24);
+				g.words.w1 = (uintptr_t)malloc(fName.size() + 1);
+				strcpy((char*)g.words.w1, fName.data());
 			}
 			else if (childName == "SetCycleType")
 			{
@@ -203,6 +299,7 @@ namespace Ship
 			else if (childName == "LoadVertices")
 			{
 				std::string fName = child->Attribute("Path");
+				//fName = ">" + fName;
 				g = { gsSPVertex(0, child->IntAttribute("Count"), child->IntAttribute("Index")) };
 
 				g.words.w0 &= 0x00FFFFFF;
@@ -219,6 +316,7 @@ namespace Ship
 			else if (childName == "SetTextureImage")
 			{
 				std::string fName = child->Attribute("Path");
+				//fName = ">" + fName;
 				uint32_t fmt = child->IntAttribute("Format");
 				uint32_t siz = child->IntAttribute("Size");
 				uint32_t width = child->IntAttribute("Width");
@@ -299,6 +397,7 @@ namespace Ship
 					cmt |= G_TX_CLAMP;
 
 				std::string fName = child->Attribute("Path");
+				//fName = ">" + fName;
 
 				Gfx g2[7];
 
@@ -353,26 +452,72 @@ namespace Ship
 			}
 			else if (childName == "ClipRatio")
 			{
-				// OTRTODO:
-					//uint32_t ratio = child->IntAttribute("Start");
+				uint32_t ratio = child->IntAttribute("Start");
+				Gfx g2[4];
 
-					//g = gsSPClipRatio(ratio);
+				switch (ratio)
+				{
+				case 1:
+				{
+					Gfx g3[4] = { gsSPClipRatio(FRUSTRATIO_1) };
+					memcpy(g2, g3, sizeof(Gfx) * 4);
+				}
+					break;
+				case 2:
+				{
+					Gfx g3[4] = { gsSPClipRatio(FRUSTRATIO_2) };
+					memcpy(g2, g3, sizeof(Gfx) * 4);
+				}
+					break;
+				case 3:
+				{
+					Gfx g3[4] = { gsSPClipRatio(FRUSTRATIO_3) };
+					memcpy(g2, g3, sizeof(Gfx) * 4);
+				}
+					break;
+				case 4:
+				{
+					Gfx g3[4] = { gsSPClipRatio(FRUSTRATIO_4) };
+					memcpy(g2, g3, sizeof(Gfx) * 4);
+				}
+					break;
+				case 5:
+				{
+					Gfx g3[4] = { gsSPClipRatio(FRUSTRATIO_5) };
+					memcpy(g2, g3, sizeof(Gfx) * 4);
+				}
+					break;
+				case 6:
+				{
+					Gfx g3[4] = { gsSPClipRatio(FRUSTRATIO_6) };
+					memcpy(g2, g3, sizeof(Gfx) * 4);
+				}
+					break;
+				}
+
+				for (int j = 0; j < 4; j++)
+				{
+					dl->instructions.push_back(g2[j].words.w0);
+					dl->instructions.push_back(g2[j].words.w1);
+				}
 			}
 			else if (childName == "JumpToDisplayList")
 			{
-				char* dlPath = (char*)child->Attribute("Path");
+				std::string dlPath = (char*)child->Attribute("Path");
+				//dlPath = ">" + dlPath;
 
-				char* dlPath2 = (char*)malloc(strlen(dlPath) + 1);
-				strcpy(dlPath2, dlPath);
+				char* dlPath2 = (char*)malloc(strlen(dlPath.c_str()) + 1);
+				strcpy(dlPath2, dlPath.c_str());
 
 				g = gsSPBranchListOTR2(dlPath2);
 			}
 			else if (childName == "CallDisplayList")
 			{
-				char* dlPath = (char*)child->Attribute("Path");
+				std::string dlPath = (char*)child->Attribute("Path");
+				//dlPath = ">" + dlPath;
 
-				char* dlPath2 = (char*)malloc(strlen(dlPath) + 1);
-				strcpy(dlPath2, dlPath);
+				char* dlPath2 = (char*)malloc(strlen(dlPath.c_str()) + 1);
+				strcpy(dlPath2, dlPath.c_str());
 
 				g = gsSPDisplayListOTR2(dlPath2);
 			}
@@ -417,6 +562,72 @@ namespace Ship
 					g = gsSPClearGeometryMode(clearData);
 				else
 					g = gsSPSetGeometryMode(clearData);
+			}
+			else if (childName == "LightColor")
+			{
+			int n = child->IntAttribute("N");
+			uint32_t col = child->IntAttribute("Col");
+
+			Gfx g2[2];
+
+			switch (n)
+			{
+				case 1:
+				{
+					Gfx g3[2] = { gsSPLightColor(LIGHT_1, col) };
+					memcpy(g2, g3, sizeof(Gfx) * 2);
+				}
+					break;
+				case 2:
+				{
+					Gfx g3[2] = { gsSPLightColor(LIGHT_2, col) };
+					memcpy(g2, g3, sizeof(Gfx) * 2);
+				}
+					break;
+				case 3:
+				{
+					Gfx g3[2] = { gsSPLightColor(LIGHT_3, col) };
+					memcpy(g2, g3, sizeof(Gfx) * 2);
+				}
+					break;
+				case 4:
+				{
+					Gfx g3[2] = { gsSPLightColor(LIGHT_4, col) };
+					memcpy(g2, g3, sizeof(Gfx) * 2);
+				}
+					break;
+				case 5:
+				{
+					Gfx g3[2] = { gsSPLightColor(LIGHT_5, col) };
+					memcpy(g2, g3, sizeof(Gfx) * 2);
+				}
+					break;
+				case 6:
+				{
+					Gfx g3[2] = { gsSPLightColor(LIGHT_6, col) };
+					memcpy(g2, g3, sizeof(Gfx) * 2);
+				}
+					break;
+				case 7:
+				{
+					Gfx g3[2] = { gsSPLightColor(LIGHT_7, col) };
+					memcpy(g2, g3, sizeof(Gfx) * 2);
+				}
+					break;
+				case 8:
+				{
+					Gfx g3[2] = { gsSPLightColor(LIGHT_8, col) };
+					memcpy(g2, g3, sizeof(Gfx) * 2);
+				}
+					break;
+			}
+
+			for (int j = 0; j < 2; j++)
+			{
+				dl->instructions.push_back(g2[j].words.w0);
+				dl->instructions.push_back(g2[j].words.w1);
+			}
+
 			}
 			else if (childName == "SetRenderMode")
 			{

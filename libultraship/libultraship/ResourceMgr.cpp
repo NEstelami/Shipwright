@@ -207,7 +207,8 @@ namespace Ship {
 		return fileCacheFind->second;
 	}
 
-	std::shared_ptr<File> ResourceMgr::LoadFile(const std::string& FilePath) {
+	std::shared_ptr<File> ResourceMgr::LoadFile(const std::string& FilePath) 
+	{
 		auto ToLoad = LoadFileAsync(FilePath);
 		// Wait for the File to actually be loaded if we are told to block.
 		std::unique_lock<std::mutex> Lock(ToLoad->FileLoadMutex);
