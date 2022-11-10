@@ -1,6 +1,7 @@
 #include "DisplayList.h"
 #include "PR/ultra64/gbi.h"
 #include <Lib/StrHash64.h>
+#include <Utils/StringHelper.h>
 
 namespace Ship
 {
@@ -78,7 +79,7 @@ namespace Ship
 			}
 			else if (childName == "SetPrimColor")
 			{
-				g = gsDPSetPrimColor(child->IntAttribute("MinLevel"), child->IntAttribute("LodFrac"), child->IntAttribute("R"),
+				g = gsDPSetPrimColor(child->IntAttribute("M"), child->IntAttribute("L"), child->IntAttribute("R"),
 					child->IntAttribute("G"), child->IntAttribute("B"), child->IntAttribute("A"));
 			}
 			else if (childName == "SetPrimDepth")
@@ -247,9 +248,17 @@ namespace Ship
 			}
 			else if (childName == "SetTextureLUT")
 			{
-				uint32_t mode = child->IntAttribute("Mode");
+				std::string mode = child->Attribute("Mode");
+				uint32_t modeVal = 0;
 
-				g = gsDPSetTextureLUT(mode);
+				if (mode == "G_TT_NONE")
+					modeVal = G_TT_NONE;
+				else if (mode == "G_TT_RGBA16")
+					modeVal = G_TT_RGBA16;
+				else if (mode == "G_TT_IA16")
+					modeVal = G_TT_IA16;
+
+				g = gsDPSetTextureLUT(modeVal);
 			}
 			else if (childName == "LoadTLUTCmd")
 			{
@@ -365,20 +374,36 @@ namespace Ship
 					sizVal = G_IM_SIZ_4b;
 				else if (siz == "G_IM_SIZ_8b")
 					sizVal = G_IM_SIZ_8b;
-				else if (siz == "G_IM_SIZ_16b")
+				else if (siz == "G_IM_SIZ_16b" || siz == "G_IM_SIZ_16b_LOAD_BLOCK")
 					sizVal = G_IM_SIZ_16b;
 				else if (siz == "G_IM_SIZ_32b")
 					sizVal = G_IM_SIZ_32b;
 				else if (siz == "G_IM_SIZ_DD")
 					sizVal = G_IM_SIZ_DD;
+				else
+				{
+					int bp = 0;
+				}
 				
 				uint32_t width = child->IntAttribute("Width");
 
-				g = { gsDPSetTextureImage(fmtVal, sizVal, width + 1, 0) };
-				g.words.w0 &= 0x00FFFFFF;
-				g.words.w0 += (G_SETTIMG_OTR2 << 24);
-				g.words.w1 = (uintptr_t)malloc(fName.size() + 1);
-				strcpy((char*)g.words.w1, fName.data());
+				// OTRTODO: Add a proper XML node for these...
+				if (StringHelper::EndsWith(fName, "0x08000000"))
+				{
+					g = { gsDPSetTextureImage(fmtVal, sizVal, width + 1, 0x08000001) };
+				}
+				else if (StringHelper::EndsWith(fName, "0x09000000"))
+				{
+					g = { gsDPSetTextureImage(fmtVal, sizVal, width + 1, 0x09000001) };
+				}
+				else
+				{
+					g = { gsDPSetTextureImage(fmtVal, sizVal, width + 1, 0) };
+					g.words.w0 &= 0x00FFFFFF;
+					g.words.w0 += (G_SETTIMG_OTR2 << 24);
+					g.words.w1 = (uintptr_t)malloc(fName.size() + 1);
+					strcpy((char*)g.words.w1, fName.data());
+				}
 
 				dl->instructions.push_back(g.words.w0);
 				dl->instructions.push_back(g.words.w1);
@@ -387,14 +412,14 @@ namespace Ship
 			}
 			else if (childName == "SetTile")
 			{
-				//uint32_t fmt = child->IntAttribute("Format");
-				//uint32_t siz = child->IntAttribute("Size");
 				uint32_t line = child->IntAttribute("Line");
 				uint32_t tmem = child->IntAttribute("TMem");
 				uint32_t tile = child->IntAttribute("Tile");
 				uint32_t palette = child->IntAttribute("Palette");
-				uint32_t cmt0 = child->IntAttribute("Cmt0");
-				uint32_t cmt1 = child->IntAttribute("Cmt1");
+				std::string cms0 = child->Attribute("Cms0");
+				std::string cms1 = child->Attribute("Cms1");
+				std::string cmt0 = child->Attribute("Cmt0");
+				std::string cmt1 = child->Attribute("Cmt1");
 				uint32_t maskS = child->IntAttribute("MaskS");
 				uint32_t maskT = child->IntAttribute("MaskT");
 				uint32_t shiftS = child->IntAttribute("ShiftS");
@@ -424,17 +449,47 @@ namespace Ship
 					sizVal = G_IM_SIZ_4b;
 				else if (siz == "G_IM_SIZ_8b")
 					sizVal = G_IM_SIZ_8b;
-				else if (siz == "G_IM_SIZ_16b")
+				else if (siz == "G_IM_SIZ_16b" || siz == "G_IM_SIZ_16b_LOAD_BLOCK")
 					sizVal = G_IM_SIZ_16b;
 				else if (siz == "G_IM_SIZ_32b")
 					sizVal = G_IM_SIZ_32b;
 				else if (siz == "G_IM_SIZ_DD")
 					sizVal = G_IM_SIZ_DD;
+				else
+				{
+					int bp = 0;
+				}
 
-				//fmt = G_IM_FMT_I;
-				//siz = G_IM_SIZ_8b_LOAD_BLOCK;
+				uint32_t cms0Val = 0;
+				uint32_t cms1Val = 0;
+				uint32_t cmt0Val = 0;
+				uint32_t cmt1Val = 0;
 				
-				g = gsDPSetTile(fmtVal, sizVal, line, tmem, tile, palette, cmt0, maskT, shiftT, cmt1, maskS, shiftS);
+				if (cms0 == "G_TX_MIRROR")
+					cms0Val = G_TX_MIRROR;
+
+				if (cms0 == "G_TX_CLAMP")
+					cms0Val = G_TX_CLAMP;
+
+				if (cms1 == "G_TX_MIRROR")
+					cms1Val = G_TX_MIRROR;
+
+				if (cms1 == "G_TX_CLAMP")
+					cms1Val = G_TX_CLAMP;
+
+				if (cmt0 == "G_TX_MIRROR")
+					cmt0Val = G_TX_MIRROR;
+
+				if (cmt0 == "G_TX_CLAMP")
+					cmt0Val = G_TX_CLAMP;
+
+				if (cmt1 == "G_TX_MIRROR")
+					cmt1Val = G_TX_MIRROR;
+
+				if (cmt1 == "G_TX_CLAMP")
+					cmt1Val = G_TX_CLAMP;
+
+				g = gsDPSetTile(fmtVal, sizVal, line, tmem, tile, palette, cmt0Val | cmt1Val, maskT, shiftT, cms0Val | cms1Val, maskS, shiftS);
 			}
 			else if (childName == "SetTileSize")
 			{
@@ -445,6 +500,214 @@ namespace Ship
 				uint32_t lrt = child->IntAttribute("Lrt");
 
 				g = gsDPSetTileSize(t, uls, ult, lrs, lrt);
+			}
+			else if (childName == "SetOtherMode")
+			{
+				std::string cmdStr = child->Attribute("Cmd");
+				int sft = child->IntAttribute("Sft");
+				int length = child->IntAttribute("Length");
+				uint32_t data = 0;
+				uint32_t cmdVal = 0;
+	
+				if (cmdStr == "G_SETOTHERMODE_H")
+					cmdVal = G_SETOTHERMODE_H;
+				else if (cmdStr == "G_SETOTHERMODE_L")
+					cmdVal = G_SETOTHERMODE_L;
+
+				// OTRTODO: There are so many more of these we haven't added in yet...
+				if (child->Attribute("G_AD_PATTERN", 0))
+					data |= G_AD_PATTERN;
+
+				if (child->Attribute("G_AD_NOTPATTERN", 0))
+					data |= G_AD_NOTPATTERN;
+
+				if (child->Attribute("G_AD_DISABLE", 0))
+					data |= G_AD_DISABLE;
+
+				if (child->Attribute("G_AD_NOISE", 0))
+					data |= G_AD_NOISE;
+
+				if (child->Attribute("G_CD_MAGICSQ", 0))
+					data |= G_CD_MAGICSQ;
+
+				if (child->Attribute("G_CD_BAYER", 0))
+					data |= G_CD_BAYER;
+
+				if (child->Attribute("G_CD_NOISE", 0))
+					data |= G_CD_NOISE;
+
+				if (child->Attribute("G_CK_NONE", 0))
+					data |= G_CK_NONE;
+
+				if (child->Attribute("G_CK_KEY", 0))
+					data |= G_CK_KEY;
+
+				if (child->Attribute("G_TC_CONV", 0))
+					data |= G_TC_CONV;
+
+				if (child->Attribute("G_TC_FILTCONV", 0))
+					data |= G_TC_FILTCONV;
+
+				if (child->Attribute("G_TC_FILT", 0))
+					data |= G_TC_FILT;
+
+				if (child->Attribute("G_TF_POINT", 0))
+					data |= G_TF_POINT;
+
+				if (child->Attribute("G_TF_AVERAGE", 0))
+					data |= G_TF_AVERAGE;
+
+				if (child->Attribute("G_TF_BILERP", 0))
+					data |= G_TF_BILERP;
+
+				if (child->Attribute("G_TL_TILE", 0))
+					data |= G_TL_TILE;
+
+				if (child->Attribute("G_TL_LOD", 0))
+					data |= G_TL_LOD;
+
+				if (child->Attribute("G_TD_CLAMP", 0))
+					data |= G_TD_CLAMP;
+
+				if (child->Attribute("G_TD_SHARPEN", 0))
+					data |= G_TD_SHARPEN;
+
+				if (child->Attribute("G_TD_DETAIL", 0))
+					data |= G_TD_DETAIL;
+
+				if (child->Attribute("G_TP_NONE", 0))
+					data |= G_TP_NONE;
+
+				if (child->Attribute("G_TP_PERSP", 0))
+					data |= G_TP_PERSP;
+
+				if (child->Attribute("G_CYC_1CYCLE", 0))
+					data |= G_CYC_1CYCLE;
+
+				if (child->Attribute("G_CYC_COPY", 0))
+					data |= G_CYC_COPY;
+
+				if (child->Attribute("G_CYC_FILL", 0))
+					data |= G_CYC_FILL;
+
+				if (child->Attribute("G_CYC_2CYCLE", 0))
+					data |= G_CYC_2CYCLE;
+
+				if (child->Attribute("G_PM_1PRIMITIVE", 0))
+					data |= G_PM_1PRIMITIVE;
+
+				if (child->Attribute("G_PM_NPRIMITIVE", 0))
+					data |= G_PM_NPRIMITIVE;
+
+				if (child->Attribute("G_RM_FOG_SHADE_A", 0))
+					data |= G_RM_FOG_SHADE_A;
+
+				if (child->Attribute("G_RM_FOG_PRIM_A", 0))
+					data |= G_RM_FOG_PRIM_A;
+
+				if (child->Attribute("G_RM_PASS", 0))
+					data |= G_RM_PASS;
+
+				if (child->Attribute("G_ZS_PIXEL", 0))
+					data |= G_ZS_PIXEL;
+
+				if (child->Attribute("G_ZS_PRIM", 0))
+					data |= G_ZS_PRIM;
+
+				if (child->Attribute("G_RM_AA_ZB_OPA_SURF", 0))
+					data |= G_RM_AA_ZB_OPA_SURF;
+
+				if (child->Attribute("G_RM_AA_ZB_OPA_SURF2", 0))
+					data |= G_RM_AA_ZB_OPA_SURF2;
+
+				if (child->Attribute("G_RM_AA_ZB_OPA_SURF2", 0))
+					data |= G_RM_AA_ZB_OPA_SURF2;
+
+				if (child->Attribute("G_RM_AA_ZB_XLU_SURF", 0))
+					data |= G_RM_AA_ZB_XLU_SURF;
+
+				if (child->Attribute("G_RM_AA_ZB_XLU_SURF2", 0))
+					data |= G_RM_AA_ZB_XLU_SURF2;
+
+				if (child->Attribute("G_RM_AA_ZB_OPA_DECAL", 0))
+					data |= G_RM_AA_ZB_OPA_DECAL;
+
+				if (child->Attribute("G_RM_AA_ZB_OPA_DECAL2", 0))
+					data |= G_RM_AA_ZB_OPA_DECAL2;
+
+				if (child->Attribute("G_RM_AA_ZB_XLU_DECAL", 0))
+					data |= G_RM_AA_ZB_XLU_DECAL;
+
+				if (child->Attribute("G_RM_AA_ZB_XLU_DECAL2", 0))
+					data |= G_RM_AA_ZB_XLU_DECAL2;
+
+				if (child->Attribute("G_RM_AA_ZB_OPA_INTER", 0))
+					data |= G_RM_AA_ZB_OPA_INTER;
+
+				if (child->Attribute("G_RM_AA_ZB_OPA_INTER2", 0))
+					data |= G_RM_AA_ZB_OPA_INTER2;
+
+				if (child->Attribute("G_RM_AA_ZB_XLU_INTER", 0))
+					data |= G_RM_AA_ZB_XLU_INTER;
+
+				if (child->Attribute("G_RM_AA_ZB_XLU_INTER2", 0))
+					data |= G_RM_AA_ZB_XLU_INTER2;
+
+				if (child->Attribute("G_RM_AA_ZB_XLU_LINE", 0))
+					data |= G_RM_AA_ZB_XLU_LINE;
+
+				if (child->Attribute("G_RM_AA_ZB_XLU_LINE2", 0))
+					data |= G_RM_AA_ZB_XLU_LINE2;
+
+				if (child->Attribute("G_RM_AA_ZB_DEC_LINE", 0))
+					data |= G_RM_AA_ZB_DEC_LINE;
+
+				if (child->Attribute("G_RM_AA_ZB_DEC_LINE2", 0))
+					data |= G_RM_AA_ZB_DEC_LINE2;
+
+				if (child->Attribute("G_RM_AA_ZB_TEX_EDGE", 0))
+					data |= G_RM_AA_ZB_TEX_EDGE;
+
+				if (child->Attribute("G_RM_AA_ZB_TEX_EDGE2", 0))
+					data |= G_RM_AA_ZB_TEX_EDGE2;
+
+				if (child->Attribute("G_RM_AA_ZB_TEX_INTER", 0))
+					data |= G_RM_AA_ZB_TEX_INTER;
+
+				if (child->Attribute("G_RM_AA_ZB_TEX_INTER2", 0))
+					data |= G_RM_AA_ZB_TEX_INTER2;
+
+				if (child->Attribute("G_RM_AA_ZB_SUB_SURF", 0))
+					data |= G_RM_AA_ZB_SUB_SURF;
+
+				if (child->Attribute("G_RM_AA_ZB_SUB_SURF2", 0))
+					data |= G_RM_AA_ZB_SUB_SURF2;
+
+				if (child->Attribute("G_RM_AA_ZB_PCL_SURF", 0))
+					data |= G_RM_AA_ZB_PCL_SURF;
+
+				if (child->Attribute("G_RM_AA_ZB_PCL_SURF2", 0))
+					data |= G_RM_AA_ZB_PCL_SURF2;
+
+				if (child->Attribute("G_RM_AA_ZB_OPA_TERR", 0))
+					data |= G_RM_AA_ZB_OPA_TERR;
+
+				if (child->Attribute("G_RM_AA_ZB_OPA_TERR2", 0))
+					data |= G_RM_AA_ZB_OPA_TERR2;
+
+				if (child->Attribute("G_RM_AA_ZB_TEX_TERR", 0))
+					data |= G_RM_AA_ZB_TEX_TERR;
+
+				if (child->Attribute("G_RM_AA_ZB_TEX_TERR2", 0))
+					data |= G_RM_AA_ZB_TEX_TERR2;
+
+				if (child->Attribute("G_RM_AA_ZB_SUB_TERR", 0))
+					data |= G_RM_AA_ZB_SUB_TERR;
+
+				if (child->Attribute("G_RM_AA_ZB_SUB_TERR2", 0))
+					data |= G_RM_AA_ZB_SUB_TERR2;
+
+				g = gsSPSetOtherMode(cmdVal, sft, length, data);
 			}
 			else if (childName == "LoadTextureBlock")
 			{
@@ -612,37 +875,37 @@ namespace Ship
 			{
 				uint64_t clearData = 0;
 
-				if (child->Attribute("Shade", 0))
+				if (child->Attribute("G_SHADE", 0))
 					clearData |= G_SHADE;
 
-				if (child->Attribute("Lighting", 0))
+				if (child->Attribute("G_LIGHTING", 0))
 					clearData |= G_LIGHTING;
 
-				if (child->Attribute("ShadingSmooth", 0))
+				if (child->Attribute("G_SHADING_SMOOTH", 0))
 					clearData |= G_SHADING_SMOOTH;
 
-				if (child->Attribute("ZBuffer", 0))
+				if (child->Attribute("G_ZBUFFER", 0))
 					clearData |= G_ZBUFFER;
 
-				if (child->Attribute("TextureGen", 0))
+				if (child->Attribute("G_TEXTURE_GEN", 0))
 					clearData |= G_TEXTURE_GEN;
 
-				if (child->Attribute("TextureGenLinear", 0))
+				if (child->Attribute("G_TEXTURE_GEN_LINEAR", 0))
 					clearData |= G_TEXTURE_GEN_LINEAR;
 
-				if (child->Attribute("CullBack", 0))
+				if (child->Attribute("G_CULL_BACK", 0))
 					clearData |= G_CULL_BACK;
 
-				if (child->Attribute("CullFront", 0))
+				if (child->Attribute("G_CULL_FRONT", 0))
 					clearData |= G_CULL_FRONT;
 
-				if (child->Attribute("CullBoth", 0))
+				if (child->Attribute("G_CULL_BOTH", 0))
 					clearData |= G_CULL_BOTH;
 
-				if (child->Attribute("Fog", 0))
+				if (child->Attribute("G_FOG", 0))
 					clearData |= G_FOG;
 
-				if (child->Attribute("Clipping", 0))
+				if (child->Attribute("G_CLIPPING", 0))
 					clearData |= G_CLIPPING;
 
 				if (childName == "ClearGeometryMode")

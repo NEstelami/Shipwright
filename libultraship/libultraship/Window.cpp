@@ -203,42 +203,39 @@ extern "C" {
                 std::shared_ptr<char[]> pixelData(new char[w * h * 4]);
                 memcpy(pixelData.get(), pixels, w * h * 4);
                 rawTexData->cachedData = pixelData;
-                
-                if (StringHelper::EndsWith(texPath, "_rgba16"))
+
+                if (true)
                 {
-                    for (size_t pos = 0; pos < w * h * 4; pos += 4)
+                    if (StringHelper::EndsWith(texPath, "_rgba16"))
                     {
-                        uint8_t r = pixels[pos + 0];
-                        uint8_t g = pixels[pos + 1];
-                        uint8_t b = pixels[pos + 2];
-                        uint8_t a = pixels[pos + 3];
+                        for (size_t pos = 0; pos < w * h * 4; pos += 4)
+                        {
+                            uint8_t r = pixels[pos + 0];
+                            uint8_t g = pixels[pos + 1];
+                            uint8_t b = pixels[pos + 2];
+                            uint8_t a = pixels[pos + 3];
 
-                        uint8_t nR = r / 8;
-                        uint8_t nG = g / 8;
-                        uint8_t nB = b / 8;
-                        uint8_t alphaBit = a != 0;
+                            uint8_t nR = r / 8;
+                            uint8_t nG = g / 8;
+                            uint8_t nB = b / 8;
+                            uint8_t alphaBit = a != 0;
 
-                        uint16_t data = (nR << 11) + (nG << 6) + (nB << 1) + alphaBit;
+                            uint16_t data = (nR << 11) + (nG << 6) + (nB << 1) + alphaBit;
 
-                        pixelData[(pos / 4) + 0] = (data & 0xFF00) >> 8;
-                        pixelData[(pos / 4) + 1] = (data & 0x00FF);
+                            pixelData[((pos / 4)*2) + 0] = (data & 0xFF00) >> 8;
+                            pixelData[((pos / 4)*2) + 1] = (data & 0x00FF);
+                        }
                     }
-                }
-                else if (StringHelper::EndsWith(texPath, "_i8"))
-                {
-                    for (size_t pos = 0; pos < w * h * 4; pos += 4)
+                    else if (StringHelper::EndsWith(texPath, "_i8"))
                     {
-                        uint8_t r = pixels[pos + 0];
-
-                        uint8_t nR = r / 8;
-
-                        pixelData[(pos / 4) + 0] = nR;
+                        for (size_t pos = 0; pos < w * h * 4; pos += 4)
+                            pixelData[(pos / 4) + 0] = pixels[pos + 0];
                     }
                 }
 
-            stbi_image_free(pixels);
+                stbi_image_free(pixels);
 
-                
+
                 return (char*)pixelData.get();
             }
         }
@@ -247,16 +244,7 @@ extern "C" {
         Ship::ExecuteHooks<Ship::LoadTexture>(texPath, &res->imageData);
 
         if (res == nullptr)
-        {
-            char texData[4096];
-
-            for (int i = 0; i < 4096; i++)
-                texData[i] = i;
-
-            //return texData;
-
             return ResourceMgr_LoadTexByName((char*)"objects/placeholder");
-        }
 
 
         return (char*)res->imageData;

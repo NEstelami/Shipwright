@@ -775,6 +775,12 @@ void func_8008F470(GlobalContext* globalCtx, void** skeleton, Vec3s* jointTable,
 
     sDListsLodOffset = lod * 2;
 
+    // OTRTODO
+    if (LINK_AGE_IN_YEARS == YEARS_CHILD)
+        gsSPPushCD(POLY_OPA_DISP++, "objects/object_link_child/t");
+    else
+        gsSPPushCD(POLY_OPA_DISP++, "objects/object_link_boy/t");
+
     SkelAnime_DrawFlexLod(globalCtx, skeleton, jointTable, dListCount, overrideLimbDraw, postLimbDraw, data, lod);
 
     if ((overrideLimbDraw != func_800902F0) && (overrideLimbDraw != func_80090440) && (gSaveContext.gameMode != 3)) {
