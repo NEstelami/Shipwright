@@ -10913,7 +10913,7 @@ void Player_Update(Actor* thisx, GlobalContext* globalCtx) {
 
     // OTRTODO: VASE TEST
     if (!potSpawn) {
-        //Actor_Spawn(&gGlobalCtx->actorCtx, gGlobalCtx, ACTOR_EN_VASE, thisx->world.pos.x, thisx->world.pos.y + 32, thisx->world.pos.z, 0, 0, 0, 0);
+        Actor_Spawn(&gGlobalCtx->actorCtx, gGlobalCtx, ACTOR_EN_VASE, thisx->world.pos.x, thisx->world.pos.y + 32, thisx->world.pos.z, 0, 0, 0, 0);
         //Actor_Spawn(&gGlobalCtx->actorCtx, gGlobalCtx, ACTOR_EN_GELDB, thisx->world.pos.x, thisx->world.pos.y + 32, thisx->world.pos.z, 0, 0, 0, 0);
 
         potSpawn = 1;

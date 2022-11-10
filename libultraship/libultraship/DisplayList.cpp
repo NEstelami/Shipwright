@@ -289,14 +289,10 @@ namespace Ship
 				const char* ac1 = child->Attribute("Ac1", 0);
 				const char* ad1 = child->Attribute("Ad1", 0);
 
-				// OTRTODO: This should work fine but we're getting some weird results...
 				g = gsDPSetCombineLERP2(GetCombineLERPValue(a0), GetCombineLERPValue(b0), GetCombineLERPValue(c0), GetCombineLERPValue(d0), 
 					GetCombineLERPValue(aa0), GetCombineLERPValue(ab0), GetCombineLERPValue(ac0), GetCombineLERPValue(ad0), GetCombineLERPValue(a1), 
 					GetCombineLERPValue(b1), GetCombineLERPValue(c1), GetCombineLERPValue(d1), GetCombineLERPValue(aa1), GetCombineLERPValue(ab1), 
 					GetCombineLERPValue(ac1), GetCombineLERPValue(ad1));
-				
-				// For now this is temp...
-				//g = gsDPSetCombineLERP(1, TEXEL0, PRIMITIVE, TEXEL0, 0, 0, 0, 1, COMBINED, 0, SHADE, 0, 0, 0, 0, COMBINED);
 			}
 			else if (childName == "LoadSync")
 			{
