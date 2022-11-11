@@ -2,9 +2,47 @@
 #include "PR/ultra64/gbi.h"
 #include <Lib/StrHash64.h>
 #include <Utils/StringHelper.h>
+#include <unordered_map>
+#include <string>
 
-namespace Ship
-{
+namespace Ship {
+
+	std::unordered_map<std::string, uint32_t> renderModes = {
+  		{ "G_RM_ZB_OPA_SURF", G_RM_ZB_OPA_SURF },
+        { "G_RM_AA_ZB_OPA_SURF", G_RM_AA_ZB_OPA_SURF },
+        { "G_RM_AA_ZB_OPA_DECAL", G_RM_AA_ZB_OPA_DECAL },
+        { "G_RM_AA_ZB_OPA_INTER", G_RM_AA_ZB_OPA_INTER },
+        { "G_RM_AA_ZB_TEX_EDGE", G_RM_AA_ZB_TEX_EDGE },
+        { "G_RM_AA_ZB_XLU_SURF", G_RM_AA_ZB_XLU_SURF },
+        { "G_RM_AA_ZB_XLU_DECAL", G_RM_AA_ZB_XLU_DECAL },
+        { "G_RM_AA_ZB_XLU_INTER", G_RM_AA_ZB_XLU_INTER },
+        { "G_RM_FOG_SHADE_A", G_RM_FOG_SHADE_A },
+        { "G_RM_FOG_PRIM_A", G_RM_FOG_PRIM_A },
+        { "G_RM_PASS", G_RM_PASS },
+        { "G_RM_ADD", G_RM_ADD },
+        { "G_RM_NOOP", G_RM_NOOP },
+        { "G_RM_ZB_OPA_SURF", G_RM_ZB_OPA_SURF },
+        { "G_RM_ZB_OPA_DECAL", G_RM_ZB_OPA_DECAL },
+        { "G_RM_ZB_XLU_SURF", G_RM_ZB_XLU_SURF },
+        { "G_RM_ZB_XLU_DECAL", G_RM_ZB_XLU_DECAL },
+        { "G_RM_OPA_SURF", G_RM_OPA_SURF },
+        { "G_RM_ZB_CLD_SURF", G_RM_ZB_CLD_SURF },
+		{ "G_RM_ZB_OPA_SURF2", G_RM_ZB_OPA_SURF2 },
+        { "G_RM_AA_ZB_OPA_SURF2", G_RM_AA_ZB_OPA_SURF2 },
+        { "G_RM_AA_ZB_OPA_DECAL2", G_RM_AA_ZB_OPA_DECAL2 },
+        { "G_RM_AA_ZB_OPA_INTER2", G_RM_AA_ZB_OPA_INTER2 },
+        { "G_RM_AA_ZB_TEX_EDGE2", G_RM_AA_ZB_TEX_EDGE2 },
+        { "G_RM_AA_ZB_XLU_SURF2", G_RM_AA_ZB_XLU_SURF2 },
+        { "G_RM_AA_ZB_XLU_DECAL2", G_RM_AA_ZB_XLU_DECAL2 },
+        { "G_RM_AA_ZB_XLU_INTER2", G_RM_AA_ZB_XLU_INTER2 },
+        { "G_RM_ADD2", G_RM_ADD2 },
+        { "G_RM_ZB_OPA_SURF2", G_RM_ZB_OPA_SURF2 },
+        { "G_RM_ZB_OPA_DECAL2", G_RM_ZB_OPA_DECAL2 },
+        { "G_RM_ZB_XLU_SURF2", G_RM_ZB_XLU_SURF2 },
+        { "G_RM_ZB_XLU_DECAL2", G_RM_ZB_XLU_DECAL2 },
+        { "G_RM_ZB_CLD_SURF2", G_RM_ZB_CLD_SURF2 }
+	};
+
 	void DisplayListV0::ParseFileBinary(BinaryReader* reader, Resource* res)
 	{
 		DisplayList* dl = (DisplayList*)res;
@@ -289,9 +327,9 @@ namespace Ship
 				const char* ac1 = child->Attribute("Ac1", 0);
 				const char* ad1 = child->Attribute("Ad1", 0);
 
-				g = gsDPSetCombineLERP2(GetCombineLERPValue(a0), GetCombineLERPValue(b0), GetCombineLERPValue(c0), GetCombineLERPValue(d0), 
-					GetCombineLERPValue(aa0), GetCombineLERPValue(ab0), GetCombineLERPValue(ac0), GetCombineLERPValue(ad0), GetCombineLERPValue(a1), 
-					GetCombineLERPValue(b1), GetCombineLERPValue(c1), GetCombineLERPValue(d1), GetCombineLERPValue(aa1), GetCombineLERPValue(ab1), 
+				g = gsDPSetCombineLERP2(GetCombineLERPValue(a0), GetCombineLERPValue(b0), GetCombineLERPValue(c0), GetCombineLERPValue(d0),
+					GetCombineLERPValue(aa0), GetCombineLERPValue(ab0), GetCombineLERPValue(ac0), GetCombineLERPValue(ad0), GetCombineLERPValue(a1),
+					GetCombineLERPValue(b1), GetCombineLERPValue(c1), GetCombineLERPValue(d1), GetCombineLERPValue(aa1), GetCombineLERPValue(ab1),
 					GetCombineLERPValue(ac1), GetCombineLERPValue(ad1));
 			}
 			else if (childName == "LoadSync")
@@ -363,7 +401,7 @@ namespace Ship
 
 				std::string siz = child->Attribute("Size");
 				uint32_t sizVal = G_IM_SIZ_32b;
-				
+
 				if (siz == "G_IM_SIZ_8b_LOAD_BLOCK")
 					sizVal = G_IM_SIZ_8b_LOAD_BLOCK;
 				else if (siz == "G_IM_SIZ_4b")
@@ -380,7 +418,7 @@ namespace Ship
 				{
 					int bp = 0;
 				}
-				
+
 				uint32_t width = child->IntAttribute("Width");
 
 				// OTRTODO: Add a proper XML node for these...
@@ -460,7 +498,7 @@ namespace Ship
 				uint32_t cms1Val = 0;
 				uint32_t cmt0Val = 0;
 				uint32_t cmt1Val = 0;
-				
+
 				if (cms0 == "G_TX_MIRROR")
 					cms0Val = G_TX_MIRROR;
 
@@ -504,7 +542,7 @@ namespace Ship
 				int length = child->IntAttribute("Length");
 				uint32_t data = 0;
 				uint32_t cmdVal = 0;
-	
+
 				if (cmdStr == "G_SETOTHERMODE_H")
 					cmdVal = G_SETOTHERMODE_H;
 				else if (cmdStr == "G_SETOTHERMODE_L")
@@ -977,84 +1015,9 @@ namespace Ship
 			}
 			else if (childName == "SetRenderMode")
 			{
-				uint32_t mode1 = 0;
-				uint32_t mode2 = 0;
-
-				if (child->Attribute("Mode1_AAEN", 0))
-					mode1 |= AA_EN;
-
-				if (child->Attribute("Mode1_ZCMP", 0))
-					mode1 |= Z_CMP;
-
-				if (child->Attribute("Mode1_ZUPD", 0))
-					mode1 |= Z_UPD;
-
-				if (child->Attribute("Mode1_IMRD", 0))
-					mode1 |= IM_RD;
-
-				if (child->Attribute("Mode1_CVGDstWrap", 0))
-					mode1 |= CVG_DST_WRAP;
-
-				if (child->Attribute("Mode1_CVGDstFull", 0))
-					mode1 |= CVG_DST_FULL;
-
-				if (child->Attribute("Mode1_ZModeInter", 0))
-					mode1 |= ZMODE_INTER;
-
-				if (child->Attribute("Mode1_ZModeXLU", 0))
-					mode1 |= ZMODE_XLU;
-
-				if (child->Attribute("Mode1_ZModeDec", 0))
-					mode1 |= ZMODE_DEC;
-
-				if (child->Attribute("Mode1_CVGXAlpha", 0))
-					mode1 |= CVG_X_ALPHA;
-
-				if (child->Attribute("Mode1_AlphaCVGSel", 0))
-					mode1 |= ALPHA_CVG_SEL;
-
-				if (child->Attribute("Mode1_ForceBL", 0))
-					mode1 |= FORCE_BL;
-
-				if (child->Attribute("Mode2_AAEN", 0))
-					mode2 |= AA_EN;
-
-				if (child->Attribute("Mode2_ZCMP", 0))
-					mode2 |= Z_CMP;
-
-				if (child->Attribute("Mode2_ZUPD", 0))
-					mode2 |= Z_UPD;
-
-				if (child->Attribute("Mode2_IMRD", 0))
-					mode2 |= IM_RD;
-
-				if (child->Attribute("Mode2_CVGDstWrap", 0))
-					mode2 |= CVG_DST_WRAP;
-
-				if (child->Attribute("Mode2_CVGDstFull", 0))
-					mode2 |= CVG_DST_FULL;
-
-				if (child->Attribute("Mode2_ZModeInter", 0))
-					mode2 |= ZMODE_INTER;
-
-				if (child->Attribute("Mode2_ZModeXLU", 0))
-					mode2 |= ZMODE_XLU;
-
-				if (child->Attribute("Mode2_ZModeDec", 0))
-					mode2 |= ZMODE_DEC;
-
-				if (child->Attribute("Mode2_CVGXAlpha", 0))
-					mode2 |= CVG_X_ALPHA;
-
-				if (child->Attribute("Mode2_AlphaCVGSel", 0))
-					mode2 |= ALPHA_CVG_SEL;
-
-				if (child->Attribute("Mode2_ForceBL", 0))
-					mode2 |= FORCE_BL;
-
-
-				g = gsDPSetRenderMode(mode1, mode2);
-
+				std::string rawMode1 = child->Attribute("Mode1");
+				std::string rawMode2 = child->Attribute("Mode2");
+				g = gsDPSetRenderMode(renderModes[rawMode1], renderModes[rawMode2]);
 			}
 			else
 			{
@@ -1073,7 +1036,7 @@ namespace Ship
 	{
 		std::string strings[] = { "G_CCMUX_COMBINED", "G_CCMUX_TEXEL0", "G_CCMUX_TEXEL1", "G_CCMUX_PRIMITIVE", "G_CCMUX_SHADE", "G_CCMUX_ENVIRONMENT", "G_CCMUX_1", "G_CCMUX_NOISE", "G_CCMUX_0", "G_CCMUX_CENTER", "G_CCMUX_K4", "G_CCMUX_SCALE", "G_CCMUX_COMBINED_ALPHA", "G_CCMUX_TEXEL0_ALPHA", "G_CCMUX_TEXEL1_ALPHA", "G_CCMUX_PRIMITIVE_ALPHA", "G_CCMUX_SHADE_ALPHA", "G_CCMUX_ENV_ALPHA", "G_CCMUX_LOD_FRACTION", "G_CCMUX_PRIM_LOD_FRAC", "G_CCMUX_K5", "G_ACMUX_COMBINED", "G_ACMUX_TEXEL0", "G_ACMUX_TEXEL1", "G_ACMUX_PRIMITIVE", "G_ACMUX_SHADE", "G_ACMUX_ENVIRONMENT", "G_ACMUX_1", "G_ACMUX_0", "G_ACMUX_LOD_FRACTION", "G_ACMUX_PRIM_LOD_FRAC" };
 		uint32_t values[] = { G_CCMUX_COMBINED, G_CCMUX_TEXEL0, G_CCMUX_TEXEL1, G_CCMUX_PRIMITIVE, G_CCMUX_SHADE, G_CCMUX_ENVIRONMENT, G_CCMUX_1, G_CCMUX_NOISE, G_CCMUX_0, G_CCMUX_CENTER, G_CCMUX_K4, G_CCMUX_SCALE, G_CCMUX_COMBINED_ALPHA, G_CCMUX_TEXEL0_ALPHA, G_CCMUX_TEXEL1_ALPHA, G_CCMUX_PRIMITIVE_ALPHA, G_CCMUX_SHADE_ALPHA, G_CCMUX_ENV_ALPHA, G_CCMUX_LOD_FRACTION, G_CCMUX_PRIM_LOD_FRAC, G_CCMUX_K5, G_ACMUX_COMBINED, G_ACMUX_TEXEL0, G_ACMUX_TEXEL1, G_ACMUX_PRIMITIVE, G_ACMUX_SHADE, G_ACMUX_ENVIRONMENT, G_ACMUX_1, G_ACMUX_0, G_ACMUX_LOD_FRACTION, G_ACMUX_PRIM_LOD_FRAC };
-		
+
 		for (int i = 0; i < ARRAYSIZE(values); i++)
 		{
 			if (valStr == strings[i])

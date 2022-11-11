@@ -621,6 +621,13 @@ static void gfx_texture_cache_delete(const uint8_t* orig_addr)
     }
 }
 
+static void import_texture_raw(int tile) {
+    const uint8_t* addr = rdp.loaded_texture[rdp.texture_tile[tile].tmem_index].addr;
+    Ship::TextureInfo info;
+    memcpy(&info, addr + 4, sizeof(Ship::TextureInfo));
+    gfx_rapi->upload_texture(addr + 4 + sizeof(Ship::TextureInfo), info.width, info.height);
+}
+
 static void import_texture_rgba16(int tile) {
     uint8_t rgba32_buf[480 * 240 * 4];
     const uint8_t* addr = rdp.loaded_texture[rdp.texture_tile[tile].tmem_index].addr;
@@ -871,9 +878,15 @@ static void import_texture(int i, int tile) {
     uint8_t fmt = rdp.texture_tile[tile].fmt;
     uint8_t siz = rdp.texture_tile[tile].siz;
     uint32_t tmem_index = rdp.texture_tile[tile].tmem_index;
+    const uint8_t* addr = rdp.loaded_texture[rdp.texture_tile[tile].tmem_index].addr;
 
     if (gfx_texture_cache_lookup(i, tile))
     {
+        return;
+    }
+
+    if (addr[0] == 'C' && addr[1] == 'T' && addr[2] == 'X' && addr[3] == '_') {
+        import_texture_raw(tile);
         return;
     }
 
