@@ -88,7 +88,7 @@ extern "C" {
         pad->err_no = 0;
         pad->gyro_x = 0;
         pad->gyro_y = 0;
-        
+
         if (SohImGui::GetInputEditor()->IsOpened()) return;
 
         Ship::Window::GetInstance()->GetControlDeck()->WriteToPad(pad);
@@ -103,7 +103,7 @@ extern "C" {
     Vtx* ResourceMgr_LoadVtxByCRC(uint64_t crc) {
         const std::string* hashStr = Ship::Window::GetInstance()->GetResourceManager()->HashToString(crc);
 
-        if (hashStr != nullptr) 
+        if (hashStr != nullptr)
         {
             auto vertResHack = std::dynamic_pointer_cast<Ship::Vertex>(Ship::Window::GetInstance()->GetResourceManager()->LoadResource(hashStr->c_str()));
 
@@ -154,7 +154,7 @@ extern "C" {
     char* ResourceMgr_LoadTexByCRC(uint64_t crc)  {
         const std::string* hashStr = Ship::Window::GetInstance()->GetResourceManager()->HashToString(crc);
 
-        if (hashStr != nullptr)  
+        if (hashStr != nullptr)
         {
             const auto res = LOAD_TEX(hashStr->c_str());
             Ship::ExecuteHooks<Ship::LoadTexture>(hashStr->c_str(), &res->imageData);
@@ -182,7 +182,7 @@ extern "C" {
         }
     }
 
-    char* ResourceMgr_LoadTexByName(char* texPath) 
+    char* ResourceMgr_LoadTexByName(char* texPath)
     {
         if (texPath[0] == '_' && texPath[1] == '_' && texPath[2] == 'O' && texPath[3] == 'T' && texPath[4] == 'R' && texPath[5] == '_' && texPath[6] == '_') {
             texPath += 7;
@@ -198,44 +198,21 @@ extern "C" {
                 if (rawTexData->cachedData != nullptr)
                     return rawTexData->cachedData.get();
 
+                uint8_t offset = 4 + sizeof(Ship::TextureInfo);
+
                 int w, h, comp;
                 unsigned char* pixels = stbi_load_from_memory((const unsigned char*)buffer, rawTexData.get()->dwBufferSize, &w, &h, &comp, STBI_rgb_alpha);
-                std::shared_ptr<char[]> pixelData(new char[w * h * 4]);
-                memcpy(pixelData.get(), pixels, w * h * 4);
+                std::shared_ptr<char[]> pixelData(new char[(w * h * 4) + offset]);
+
+                // Raw texture header
+
+                Ship::TextureInfo texData = { w, h, comp };
+
+                memcpy(pixelData.get(), "CTX_", 4);
+                memcpy(pixelData.get() + 4, &texData, sizeof(Ship::TextureInfo));
+                memcpy(pixelData.get() + offset, pixels, w * h * 4);
+
                 rawTexData->cachedData = pixelData;
-
-                if (true)
-                {
-                    if (StringHelper::EndsWith(texPath, "_rgba16"))
-                    {
-                        for (size_t pos = 0; pos < w * h * 4; pos += 4)
-                        {
-                            uint8_t r = pixels[pos + 0];
-                            uint8_t g = pixels[pos + 1];
-                            uint8_t b = pixels[pos + 2];
-                            uint8_t a = pixels[pos + 3];
-
-                            uint8_t nR = r / 8;
-                            uint8_t nG = g / 8;
-                            uint8_t nB = b / 8;
-                            uint8_t alphaBit = a != 0;
-
-                            uint16_t data = (nR << 11) + (nG << 6) + (nB << 1) + alphaBit;
-
-                            pixelData[((pos / 4)*2) + 0] = (data & 0xFF00) >> 8;
-                            pixelData[((pos / 4)*2) + 1] = (data & 0x00FF);
-                        }
-                    }
-                    else if (StringHelper::EndsWith(texPath, "_i8"))
-                    {
-                        for (size_t pos = 0; pos < w * h * 4; pos += 4)
-                            pixelData[(pos / 4) + 0] = pixels[pos + 0];
-                    }
-                }
-
-                stbi_image_free(pixels);
-
-
                 return (char*)pixelData.get();
             }
         }
