@@ -1804,11 +1804,12 @@ _DW({                                   \
 #define gsSPPushCD(pkt,dl)  gDma1p(pkt,G_PUSHCD,dl,0,G_DL_PUSH)
 #define __gSPDisplayList(pkt,dl)  gDma1p(pkt,G_DL,dl,0,G_DL_PUSH)
 #define gsSPDisplayList(   dl)  gsDma1p(   G_DL,dl,0,G_DL_PUSH)
-
+#define gsSPDisplayListOTR(   dl)  gsDma1p(   G_DL_OTR,dl,0,G_DL_PUSH)
 #define gsSPDisplayListOTR2(   dl)  gsDma1p(   G_DL_OTR2,dl,0,G_DL_PUSH)
 
 #define gSPBranchList(pkt,dl)   gDma1p(pkt,G_DL,dl,0,G_DL_NOPUSH)
 #define gsSPBranchList(   dl)   gsDma1p(   G_DL,dl,0,G_DL_NOPUSH)
+#define gsSPBranchListOTR(   dl)   gsDma1p(   G_DL_OTR,dl,0,G_DL_NOPUSH)
 #define gsSPBranchListOTR2(   dl)   gsDma1p(   G_DL_OTR2,dl,0,G_DL_NOPUSH)
 
 #define gSPSprite2DBase(pkt, s) gDma1p(pkt, G_SPRITE2D_BASE, s, sizeof(uSprite), 0)
