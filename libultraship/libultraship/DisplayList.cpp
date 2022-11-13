@@ -898,7 +898,7 @@ namespace Ship {
 				std::string dlPath = (char*)child->Attribute("Path");
 				if(dlPath[0] == '>' && dlPath[1] == '0' && (dlPath[2] == 'x' || dlPath[2] == 'X') ){
 					uint32_t seg = std::stoul(dlPath.substr(1), nullptr, 16);
-					g = { gsSPDisplayListOTR(seg) };
+					g = { gsSPDisplayList(seg | 1) };
 				} else {
 					char* dlPath2 = (char*)malloc(strlen(dlPath.c_str()) + 1);
 					strcpy(dlPath2, dlPath.c_str());

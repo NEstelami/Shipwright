@@ -2332,7 +2332,7 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             case G_VTX_OTR2:
             {
-                char* fileName = GetPathWithCurrentDir((char*)cmd->words.w1);
+                char* fileName = (char*)cmd->words.w1;
                 cmd++;
                 int vtxCnt = cmd->words.w0;
                 int vtxIdxOff = cmd->words.w1 >> 16;
@@ -2367,7 +2367,7 @@ static void gfx_run_dl(Gfx* cmd) {
 
                 if (C0(16, 1) == 0) {
                     // Push return address
-                    currentDir.push(GetPathWithoutFileName((char*)fileName));
+                    currentDir.push((char*)fileName);
                     gfx_run_dl(nDL);
                     currentDir.pop();
                 }
@@ -2567,7 +2567,7 @@ static void gfx_run_dl(Gfx* cmd) {
 
             case G_SETTIMG_OTR2:
             {
-                fileName = GetPathWithCurrentDir((char*)cmd->words.w1);
+                fileName = (char*)cmd->words.w1;
 
                 char* tex = ResourceMgr_LoadTexByName((char*)fileName);
                 uint32_t fmt = C0(21, 3);
