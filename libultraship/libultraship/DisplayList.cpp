@@ -421,14 +421,9 @@ namespace Ship {
 
 				uint32_t width = child->IntAttribute("Width");
 
-				// OTRTODO: Add a proper XML node for these...
-				if (StringHelper::EndsWith(fName, "0x08000000"))
-				{
-					g = { gsDPSetTextureImage(fmtVal, sizVal, width + 1, 0x08000001) };
-				}
-				else if (StringHelper::EndsWith(fName, "0x09000000"))
-				{
-					g = { gsDPSetTextureImage(fmtVal, sizVal, width + 1, 0x09000001) };
+				if(fName[0] == '>' && fName[1] == '0' && (fName[2] == 'x' || fName[2] == 'X') ){
+					uint32_t seg = std::stoul(fName.substr(1), nullptr, 16);
+					g = { gsDPSetTextureImage(fmtVal, sizVal, width + 1, seg | 1) };
 				}
 				else
 				{
@@ -888,22 +883,28 @@ namespace Ship {
 			else if (childName == "JumpToDisplayList")
 			{
 				std::string dlPath = (char*)child->Attribute("Path");
-				//dlPath = ">" + dlPath;
+				if(dlPath[0] == '>' && dlPath[1] == '0' && (dlPath[2] == 'x' || dlPath[2] == 'X') ){
+					uint32_t seg = std::stoul(dlPath.substr(1), nullptr, 16);
+					g = { gsSPBranchListOTR(seg | 1) };
+				} else {
+					char* dlPath2 = (char*)malloc(strlen(dlPath.c_str()) + 1);
+					strcpy(dlPath2, dlPath.c_str());
 
-				char* dlPath2 = (char*)malloc(strlen(dlPath.c_str()) + 1);
-				strcpy(dlPath2, dlPath.c_str());
-
-				g = gsSPBranchListOTR2(dlPath2);
+					g = gsSPBranchListOTR2(dlPath2);
+				}
 			}
 			else if (childName == "CallDisplayList")
 			{
 				std::string dlPath = (char*)child->Attribute("Path");
-				//dlPath = ">" + dlPath;
+				if(dlPath[0] == '>' && dlPath[1] == '0' && (dlPath[2] == 'x' || dlPath[2] == 'X') ){
+					uint32_t seg = std::stoul(dlPath.substr(1), nullptr, 16);
+					g = { gsSPDisplayListOTR(seg) };
+				} else {
+					char* dlPath2 = (char*)malloc(strlen(dlPath.c_str()) + 1);
+					strcpy(dlPath2, dlPath.c_str());
 
-				char* dlPath2 = (char*)malloc(strlen(dlPath.c_str()) + 1);
-				strcpy(dlPath2, dlPath.c_str());
-
-				g = gsSPDisplayListOTR2(dlPath2);
+					g = gsSPDisplayListOTR2(dlPath2);
+				}
 			}
 			else if (childName == "ClearGeometryMode" || childName == "SetGeometryMode")
 			{

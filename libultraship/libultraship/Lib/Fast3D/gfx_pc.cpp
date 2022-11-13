@@ -1752,7 +1752,7 @@ static void gfx_dp_load_block(uint8_t tile, uint32_t uls, uint32_t ult, uint32_t
         int bp = 0;
     }
 
-    SUPPORT_CHECK(tile == G_TX_LOADTILE);
+    // SUPPORT_CHECK(tile == G_TX_LOADTILE);
     SUPPORT_CHECK(uls == 0);
     SUPPORT_CHECK(ult == 0);
 
@@ -2362,7 +2362,7 @@ static void gfx_run_dl(Gfx* cmd) {
                 break;
             case G_DL_OTR2:
             {
-                fileName = GetPathWithCurrentDir((char*)cmd->words.w1);
+                fileName = (char*)cmd->words.w1;
                 Gfx* nDL = ResourceMgr_LoadGfxByName((char*)fileName);
 
                 if (C0(16, 1) == 0) {
